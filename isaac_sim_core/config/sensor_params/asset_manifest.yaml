@@ -1,0 +1,60 @@
+schema_version: 1
+repository: openflex_isaac_sensor_assets
+isaac_sim:
+  current: "6.0"
+  historical: "5.1"
+
+release:
+  source_commit: dbe0ab914cc7f46f180037b89ed110f8255adc1b
+  remote: null
+  combined_branch: isaacsim-6.0-sensors-combined
+
+# This repository is the source package for components 1 and 2.  The two
+# release branches are intentionally documented here even while the working
+# tree is being split into branch-specific snapshots.
+components:
+  realsense:
+    id: 1
+    branch: isaacsim-6.0-realsense
+    source_commit: dbe0ab914cc7f46f180037b89ed110f8255adc1b
+    source_roots:
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/rig.py
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/mount.py
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/frame_packet.py
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/diagnostics.py
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/transport.py
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/sinks.py
+      - ros2/openflex_isaac_sensors/config
+    owns:
+      - RealSense D435/D405 camera rigs
+      - RGB/depth ROS 2 bridge contract
+      - nominal camera calibration files
+    must_not_own:
+      - robot USD
+      - ros2_control
+      - controller_manager
+      - complete robot launch
+
+  mid360:
+    id: 2
+    branch: isaacsim-6.0-mid360
+    source_commit: dbe0ab914cc7f46f180037b89ed110f8255adc1b
+    source_roots:
+      - mid360
+      - assets/usd/scenes/mid360_empty_stage.usda
+      - ros2/openflex_isaac_sensors/openflex_isaac_sensors/mid360.py
+    owns:
+      - Livox MID360 RTX sensor configuration
+      - PointCloud2/Object ID map contract
+      - semantic-map consumer and standalone validation fixtures
+    must_not_own:
+      - robot USD
+      - ros2_control
+      - controller_manager
+      - complete robot launch
+
+integration:
+  module: ros2/openflex_isaac_sensors/openflex_isaac_sensors/integration.py
+  role: runtime composition adapter used by component 5
+  complete_entrypoint_owner: openflex_isaacsim_full
+  source_tree_is_not_a_complete_entrypoint: true

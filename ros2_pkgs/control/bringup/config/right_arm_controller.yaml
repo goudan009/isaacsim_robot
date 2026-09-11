@@ -1,0 +1,27 @@
+right_forward_position_controller:
+  ros__parameters:
+    interface_name: position
+    command_topic: /right_forward_position_controller/commands
+    joints:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7
+      - openarmx_right_finger_joint1
+
+/controller_manager:
+  ros__parameters:
+    interface_name: position
+    command_topic: /right_forward_position_controller/commands
+    joints:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7
+      - openarmx_right_finger_joint1

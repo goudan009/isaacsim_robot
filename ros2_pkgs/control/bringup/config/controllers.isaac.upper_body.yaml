@@ -1,0 +1,124 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 90
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    left_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    right_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    head_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    lift_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    velocity_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    # TopicBasedSystem exposes only standard interfaces. These compatibility
+    # controllers retain the integrated public names without requiring the
+    # lift hardware's CANopen-specific interfaces.
+    lift_state_controller:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    lift_manual_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    left_forward_effort_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    right_forward_effort_controller:
+      type: forward_command_controller/ForwardCommandController
+
+joint_state_broadcaster:
+  ros__parameters: {}
+
+left_forward_position_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - openarmx_left_joint1
+      - openarmx_left_joint2
+      - openarmx_left_joint3
+      - openarmx_left_joint4
+      - openarmx_left_joint5
+      - openarmx_left_joint6
+      - openarmx_left_joint7
+      - openarmx_left_finger_joint1
+
+right_forward_position_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7
+      - openarmx_right_finger_joint1
+
+head_forward_position_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - openarmx_head_yaw_joint
+      - openarmx_head_pitch_joint
+
+lift_position_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - lift_joint
+
+velocity_controller:
+  ros__parameters:
+    joints:
+      - lift_joint
+    interface_name: velocity
+    command_topic: /velocity_controller/commands
+
+lift_state_controller:
+  ros__parameters:
+    joints:
+      - lift_joint
+    interfaces:
+      - position
+      - velocity
+      - effort
+
+lift_manual_position_controller:
+  ros__parameters:
+    interface_name: position
+    joints:
+      - lift_joint
+
+left_forward_effort_controller:
+  ros__parameters:
+    interface_name: effort
+    joints:
+      - openarmx_left_joint1
+      - openarmx_left_joint2
+      - openarmx_left_joint3
+      - openarmx_left_joint4
+      - openarmx_left_joint5
+      - openarmx_left_joint6
+      - openarmx_left_joint7
+
+right_forward_effort_controller:
+  ros__parameters:
+    interface_name: effort
+    joints:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7

@@ -1,0 +1,5 @@
+repositories:
+  isaac_ros2_utils:
+    type: git
+    url: https://github.com/hijimasa/isaac_ros2_utils.git
+    version: fc967acaef7a68b8f409427f69e2d7f089a9f881

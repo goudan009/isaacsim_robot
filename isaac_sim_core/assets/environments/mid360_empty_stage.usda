@@ -1,0 +1,77 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Xform "MID360TestEnvironment"
+    {
+        def DomeLight "DomeLight"
+        {
+            color3f inputs:color = (1, 1, 1)
+            float inputs:intensity = 1000
+        }
+
+        # Static renderable geometry gives the standalone LiDAR real returns.
+        def Mesh "Ground" (
+            apiSchemas = ["SemanticsLabelsAPI:class"]
+        )
+        {
+            token[] semantics:labels:class = ["floor"]
+            uniform bool doubleSided = 1
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            normal3f[] normals = [(0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1)]
+            point3f[] points = [(-40, -40, 0), (40, -40, 0), (40, 40, 0), (-40, 40, 0)]
+            color3f[] primvars:displayColor = [(0.35, 0.35, 0.35)]
+        }
+
+        def Cube "TargetBox01" (
+            apiSchemas = ["SemanticsLabelsAPI:class"]
+        )
+        {
+            token[] semantics:labels:class = ["obstacle"]
+            double3 xformOp:translate = (8, 0, 1)
+            double3 xformOp:scale = (1.5, 1.5, 1)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.8, 0.2, 0.1)]
+        }
+
+        def Cube "TargetBox02" (
+            apiSchemas = ["SemanticsLabelsAPI:class"]
+        )
+        {
+            token[] semantics:labels:class = ["obstacle"]
+            double3 xformOp:translate = (0, 10, 1.5)
+            double3 xformOp:scale = (1, 1, 1.5)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.1, 0.5, 0.85)]
+        }
+
+        def Cube "TargetBox03" (
+            apiSchemas = ["SemanticsLabelsAPI:class"]
+        )
+        {
+            token[] semantics:labels:class = ["obstacle"]
+            double3 xformOp:translate = (-10, -6, 2)
+            double3 xformOp:scale = (1, 2, 2)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.2, 0.7, 0.25)]
+        }
+
+        def Cube "TargetWall" (
+            apiSchemas = ["SemanticsLabelsAPI:class"]
+        )
+        {
+            token[] semantics:labels:class = ["wall"]
+            double3 xformOp:translate = (18, 0, 2.5)
+            double3 xformOp:scale = (0.25, 12, 2.5)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.55, 0.55, 0.55)]
+        }
+    }
+}

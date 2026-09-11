@@ -1,0 +1,13 @@
+lift_position_controller:
+  ros__parameters:
+    interface_name: position
+    command_topic: /lift_position_controller/commands
+    joints:
+      - lift_joint
+
+/controller_manager:
+  ros__parameters:
+    interface_name: position
+    command_topic: /lift_position_controller/commands
+    joints:
+      - lift_joint

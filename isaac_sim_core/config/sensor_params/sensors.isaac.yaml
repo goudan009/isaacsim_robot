@@ -1,0 +1,64 @@
+# Target sensor compatibility notes for the Isaac Sim MVP.
+#
+# isaac_ros2_scripts creates topics from Isaac prim paths, so the actual topic
+# prefixes depend on the imported USD structure. Use this file as the target
+# contract when adding remaps or a small bridge node after observing the
+# generated Isaac topics.
+#
+# Editable USD camera mounts (under the corresponding moving link):
+# BaseCameraMount, HeadCameraMount, LeftWristCameraMount, RightWristCameraMount.
+
+target_topics:
+  base_camera:
+    color_image: /cam_base/color/image
+    color_camera_info: /cam_base/color/camera_info
+    color_compressed: /cam_base/color/image/compressed
+    depth_image: /cam_base/depth/image
+    depth_camera_info: /cam_base/depth/camera_info
+  head_camera:
+    color_image: /cam_head/color/image
+    color_camera_info: /cam_head/color/camera_info
+    color_compressed: /cam_head/color/image/compressed
+    depth_image: /cam_head/depth/image
+    depth_camera_info: /cam_head/depth/camera_info
+  left_wrist_camera:
+    color_image: /cam_left/color/image
+    color_camera_info: /cam_left/color/camera_info
+    color_compressed: /cam_left/color/image/compressed
+    depth_image: /cam_left/depth/image
+    depth_camera_info: /cam_left/depth/camera_info
+  right_wrist_camera:
+    color_image: /cam_right/color/image
+    color_camera_info: /cam_right/color/camera_info
+    color_compressed: /cam_right/color/image/compressed
+    depth_image: /cam_right/depth/image
+    depth_camera_info: /cam_right/depth/camera_info
+  lidar:
+    pointcloud: /livox/lidar
+    scan: /scan
+  imu:
+    base: /imu
+    livox: /livox/imu
+
+optional_future_topics:
+  base_depth_points: /cam_base/depth/points
+
+isaac_urdf_sensors:
+  base_rgb_link: d435_color_optical_frame
+  base_depth_link: d435_depth_optical_frame
+  head_link: head_yaw_link
+  left_wrist_link: openarmx_left_hand
+  right_wrist_link: openarmx_right_hand
+  lidar_link: livox_frame
+  lidar_scan_link: livox_scan_frame
+
+known_gap:
+  base_depth_points: /cam_base/depth/points is not part of the required
+    current runtime contract; enable the parity verifier's depth-points check
+    only after the bridge publishes a real PointCloud2 stream for the base
+    depth camera.
+  wrist_camera_extrinsics: wrist cameras are currently mounted at the hand link
+    origin as a simulation approximation. Add dedicated calibrated camera links
+    when exact real wrist camera extrinsics are required.
+  imu: isaac_ros2_utils does not currently parse IMU sensors from URDF; add an
+    Isaac action graph or small utility patch when IMU parity is required.

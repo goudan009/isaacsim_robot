@@ -1,0 +1,38 @@
+# ROS 2 / colcon outputs
+build/
+install/
+log/
+
+# Python caches and test outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+
+# Isaac Sim and generated assets
+isaac_sim_core/assets/generated/
+*.usd.bak
+*.usda.bak
+
+# Local reports and runtime logs
+reports/raw/
+reports/**/raw/
+reports/runtime/generated/
+*.log
+
+# Generated runtime descriptions and local measurement exports
+*.bag
+*.db3
+*.mcap
+*.rosbag
+*.csv
+*.jsonl
+
+# Editors and operating-system metadata
+.idea/
+.vscode/
+.DS_Store
+*.swp

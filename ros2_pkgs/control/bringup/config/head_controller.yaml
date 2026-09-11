@@ -1,0 +1,15 @@
+head_forward_position_controller:
+  ros__parameters:
+    interface_name: position
+    command_topic: /head_forward_position_controller/commands
+    joints:
+      - openarmx_head_yaw_joint
+      - openarmx_head_pitch_joint
+
+/controller_manager:
+  ros__parameters:
+    interface_name: position
+    command_topic: /head_forward_position_controller/commands
+    joints:
+      - openarmx_head_yaw_joint
+      - openarmx_head_pitch_joint

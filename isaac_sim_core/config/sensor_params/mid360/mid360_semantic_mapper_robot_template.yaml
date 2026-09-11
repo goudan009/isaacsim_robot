@@ -1,0 +1,35 @@
+input:
+  pointcloud_topic: /openflex/livox_frame/lidar
+  object_id_map_topic: /openflex/livox_frame/lidar/object_id_map
+
+frames:
+  map_frame: map
+  transform_timeout_sec: 0.10
+  allow_identity_when_same_frame: false
+
+mapping:
+  voxel_size: 0.10
+  min_range: 0.10
+  max_range: 70.0
+  max_voxels: 2000000
+
+classes:
+  unknown: {id: 0, color: [128, 128, 128]}
+  floor: {id: 1, color: [90, 90, 90]}
+  obstacle: {id: 2, color: [220, 70, 50]}
+  wall: {id: 3, color: [170, 170, 170]}
+  robot: {id: 4, color: [60, 120, 220]}
+
+# Replace these scene-specific rules with the prim paths used by the robot's
+# USD assets. The LiDAR and mapper do not require a custom ROS message.
+rules:
+  - {prim_path_regex: '/World/.*/Ground(?:/|$)', class: floor}
+  - {prim_path_regex: '/World/.*/Wall[^/]*(?:/|$)', class: wall}
+  - {prim_path_regex: '/World/.*/(Box|Obstacle|Chair|Table)[^/]*(?:/|$)', class: obstacle}
+  - {prim_path_regex: '/World/.*/(base_link|chassis)(?:/|$)', class: robot}
+
+output:
+  semantic_pointcloud_topic: /openflex/semantic_map
+  report_topic: /openflex/semantic_map/report
+  save_service: /openflex/semantic_map/save
+  directory: ~/openflex_semantic_map

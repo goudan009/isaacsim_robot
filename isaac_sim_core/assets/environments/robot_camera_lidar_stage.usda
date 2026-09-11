@@ -1,0 +1,76 @@
+#usda 1.0
+
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def Xform "OpenFlex" (
+        prepend references = @../robots/openflex_robot.usda@
+    )
+    {
+        over "Geometry"
+        {
+            over "base_link" (
+                prepend apiSchemas = ["PhysxArticulationAPI"]
+            )
+            {
+                float physxArticulation:sleepThreshold = 0
+                int physxArticulation:solverPositionIterationCount = 32
+                int physxArticulation:solverVelocityIterationCount = 4
+                float physxArticulation:stabilizationThreshold = 0
+            }
+        }
+    }
+
+    def PhysicsScene "physicsScene" (
+        prepend apiSchemas = ["NewtonSceneAPI", "PhysxSceneAPI"]
+    )
+    {
+        vector3f physics:gravityDirection = (0, 0, -1)
+        float physics:gravityMagnitude = 9.81
+    }
+
+    # Visual, static targets for the non-authoritative MID360 performance
+    # probe. This is deliberately a separate stage so the camera-only baseline
+    # remains unchanged.
+    def Xform "LidarProbeEnvironment"
+    {
+        def Mesh "Ground"
+        {
+            uniform bool doubleSided = 1
+            int[] faceVertexCounts = [4]
+            int[] faceVertexIndices = [0, 1, 2, 3]
+            normal3f[] normals = [(0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1)]
+            point3f[] points = [(-40, -40, 0), (40, -40, 0), (40, 40, 0), (-40, 40, 0)]
+            color3f[] primvars:displayColor = [(0.35, 0.35, 0.35)]
+        }
+
+        def Cube "FrontTarget"
+        {
+            double3 xformOp:translate = (5, 0, 1.5)
+            double3 xformOp:scale = (0.5, 2, 1.5)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.8, 0.2, 0.1)]
+        }
+
+        def Cube "LeftTarget"
+        {
+            double3 xformOp:translate = (0, 6, 1.5)
+            double3 xformOp:scale = (2, 0.5, 1.5)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.1, 0.45, 0.8)]
+        }
+
+        def Cube "RearWall"
+        {
+            double3 xformOp:translate = (-8, 0, 2)
+            double3 xformOp:scale = (0.25, 10, 2)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            color3f[] primvars:displayColor = [(0.55, 0.55, 0.55)]
+        }
+    }
+}

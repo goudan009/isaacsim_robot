@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import os
+from pathlib import Path
+import unittest
+
+
+REPO_DIR = Path(__file__).resolve().parents[3]
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "contract"
+
+
+class InstallLayoutTest(unittest.TestCase):
+    def _installed_package_prefix(self) -> Path:
+        prefixes = [
+            Path(prefix)
+            for prefix in os.environ.get("AMENT_PREFIX_PATH", "").split(os.pathsep)
+            if prefix
+        ]
+        for prefix in prefixes:
+            if (prefix / "share" / "isaacsim_embodiment_contract").is_dir():
+                return prefix
+        self.fail(
+            "No installed isaacsim_embodiment_contract package found in "
+            "AMENT_PREFIX_PATH; source the install/setup.bash before running "
+            "this test."
+        )
+
+    def test_installs_config_file(self) -> None:
+        prefix = self._installed_package_prefix()
+        config = prefix / "share" / "isaacsim_embodiment_contract" / "config" / "embodiment.yaml"
+
+        self.assertTrue(config.is_file(), f"Installed config is missing: {config}")
+
+    def test_installs_executable_verify_script(self) -> None:
+        prefix = self._installed_package_prefix()
+        verifier = prefix / "lib" / "isaacsim_embodiment_contract" / "verify_embodiment_contract.py"
+
+        self.assertTrue(verifier.is_file(), f"Installed verifier is missing: {verifier}")
+        self.assertTrue(os.access(verifier, os.X_OK), f"Installed verifier is not executable: {verifier}")
+
+    def test_package_declares_yaml_runtime_dependency(self) -> None:
+        package_xml = (PACKAGE_DIR / "package.xml").read_text(encoding="utf-8")
+
+        self.assertIn("<exec_depend>python3-yaml</exec_depend>", package_xml)
+        self.assertIn("<buildtool_depend>ament_cmake_python</buildtool_depend>", package_xml)
+
+
+if __name__ == "__main__":
+    unittest.main()

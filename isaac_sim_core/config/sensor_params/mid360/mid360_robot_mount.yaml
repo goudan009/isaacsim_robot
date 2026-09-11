@@ -1,0 +1,17 @@
+schema_version: 1
+sensor:
+  model: Livox MID360
+  parent_prim: /World/OpenFlex/Geometry/base_link
+  mount_prim_path: /World/OpenFlex/Geometry/base_link/Mid360Mount
+  local_pose: {translation_m: [0.0, 0.0, 0.0], quaternion_wxyz: [1.0, 0.0, 0.0, 0.0]}
+  # Used only when a referenced robot composition does not expose
+  # ``mount_prim_path`` at runtime. It preserves the robot's intended fixed
+  # base_link -> MID360 mount transform without editing the robot USD.
+  fallback_mount_pose: {translation_m: [0.30, 0.0, 0.12], quaternion_wxyz: [0.6830127, -0.1830127, 0.1830127, -0.6830127]}
+  tick_rate_hz: 10.0
+  default_profile: MID360_APPROX
+  performance_profile: MID360_PERFORMANCE
+  pointcloud_topic: /openflex/livox_frame/lidar
+  output_topic: /livox/lidar
+  imu_topic: /livox/imu
+  frame_id: livox_frame

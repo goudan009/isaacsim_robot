@@ -1,0 +1,35 @@
+input:
+  pointcloud_topic: /openflex/livox_frame/lidar
+  object_id_map_topic: /openflex/livox_frame/lidar/object_id_map
+
+frames:
+  # Standalone smoke test: the sensor is fixed in livox_frame.
+  # A robot integration should use map/odom and provide TF to livox_frame.
+  map_frame: livox_frame
+  transform_timeout_sec: 0.05
+  allow_identity_when_same_frame: true
+
+mapping:
+  voxel_size: 0.10
+  min_range: 0.05
+  max_range: 70.0
+  max_voxels: 1000000
+
+classes:
+  unknown: {id: 0, color: [128, 128, 128]}
+  floor: {id: 1, color: [90, 90, 90]}
+  obstacle: {id: 2, color: [220, 70, 50]}
+  wall: {id: 3, color: [170, 170, 170]}
+
+# Rules are intentionally explicit: Object ID Map provides stable prim paths,
+# while this table is the portable robot/scene classification contract.
+rules:
+  - {prim_path_regex: '/World/MID360TestEnvironment/Ground(?:/|$)', class: floor}
+  - {prim_path_regex: '/World/MID360TestEnvironment/TargetWall(?:/|$)', class: wall}
+  - {prim_path_regex: '/World/MID360TestEnvironment/TargetBox[0-9]+(?:/|$)', class: obstacle}
+
+output:
+  semantic_pointcloud_topic: /openflex/semantic_map
+  report_topic: /openflex/semantic_map/report
+  save_service: /openflex/semantic_map/save
+  directory: ~/openflex_semantic_map

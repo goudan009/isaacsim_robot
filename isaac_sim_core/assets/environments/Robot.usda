@@ -1,0 +1,2191 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (2.1658338794014718, 2.813363751967849, 1.386610151285058)
+                double3 target = (-0.04713456057735632, 0.09110282248337631, 1.0193897109936807)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            double "rtx:post:tonemap:filmIso" = 50
+        }
+    }
+    defaultPrim = "World"
+    endTimeCode = 1000000
+    metersPerUnit = 1
+    startTimeCode = 0
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </OmniverseKit_Persp>
+                token omni:rtx:ambientOcclusion:denoiserMode = "none"
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                bool omni:rtx:debug:view:pixelDebug:enableFixedTextPos = 1
+                token omni:rtx:directLighting:sampledLighting:denoisingTechnique = "None"
+                bool omni:rtx:dlss:frameGeneration = 0
+                float3 omni:rtx:domeLight:rotationAxis = (0, 0, 1)
+                bool omni:rtx:indirectDiffuse:denoiser:enabled = 0
+                bool omni:rtx:material:db:nonVisualMaterialCSV:enabled = 0
+                bool omni:rtx:material:db:syncLoads = 1
+                token omni:rtx:post:dlss:execMode = "performance"
+                bool omni:rtx:post:registeredCompositing:invertColorCorrection = 1
+                bool omni:rtx:post:registeredCompositing:invertToneMap = 1
+                bool omni:rtx:pt:adaptiveSampling:filterError = 0
+                uint omni:rtx:pt:adaptiveSampling:fixedSppIterations = 2
+                int omni:rtx:pt:clampSpp = 64
+                bool omni:rtx:pt:lightcache:cached:dontResolveConflicts = 1
+                uint omni:rtx:pt:limits:maxBounces = 3
+                uint omni:rtx:pt:limits:maxGlossyBounces = 3
+                uint omni:rtx:pt:maxSamplesPerLaunch = 2073600
+                int omni:rtx:pt:maxVolumeBounces = 4
+                uint omni:rtx:pt:mgpu:maxPixelsPerRegionExponent = 12
+                int omni:rtx:pt:samplesPerIteration = 64
+                uint omni:rtx:pt:samplesPerPixel = 64
+                int omni:rtx:realtime:mgpu:tileCount = 2
+                bool omni:rtx:reflections:denoiser:enabled = 0
+                token omni:rtx:rendermode = "MinimalRendering"
+                color3f omni:rtx:rt:ambientLight:color = (0.1, 0.1, 0.1)
+                bool omni:rtx:rt:demoire = 0
+                bool omni:rtx:rt:ecoMode:enabled
+                bool omni:rtx:rt:lightcache:spatialCache:dontResolveConflicts = 1
+                int omni:rtx:rt:sss:samples = 1
+                uint omni:rtx:rtpt:maxVolumeBounces = 15
+                float omni:rtx:rtpt:modulatingRoughnessThreshold = 0.08
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                bool omni:rtx:scene:hydra:mdlMaterialWarmup = 1
+                uint omni:rtx:viewTile:limit = 4294967295
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (640, 480)
+            }
+
+            def RenderProduct "Replicator_01" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (640, 480)
+            }
+
+            def RenderProduct "Replicator_02" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/Sensors/Mid360Lidar/PointCloud>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_03" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (640, 480)
+            }
+
+            def RenderProduct "Replicator_04" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (320, 240)
+            }
+
+            def RenderProduct "Replicator_05" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (320, 240)
+            }
+
+            def RenderProduct "Replicator_06" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (320, 240)
+            }
+
+            def RenderProduct "Replicator_07" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (640, 480)
+            }
+
+            def RenderProduct "Replicator_08" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera>
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (320, 240)
+            }
+        }
+    }
+
+    def RenderSettings "OmniverseGlobalRenderSettings" (
+        prepend apiSchemas = ["OmniRtxSettingsGlobalRtAdvancedAPI_1", "OmniRtxSettingsGlobalPtAdvancedAPI_1"]
+        no_delete = true
+    )
+    {
+        rel products = [
+            </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0>,
+            </Render/OmniverseKit/HydraTextures/Replicator>,
+            </Render/OmniverseKit/HydraTextures/Replicator_01>,
+            </Render/OmniverseKit/HydraTextures/Replicator_02>,
+            </Render/OmniverseKit/HydraTextures/Replicator_03>,
+            </Render/OmniverseKit/HydraTextures/Replicator_04>,
+            </Render/OmniverseKit/HydraTextures/Replicator_05>,
+            </Render/OmniverseKit/HydraTextures/Replicator_06>,
+            </Render/OmniverseKit/HydraTextures/Replicator_07>,
+            </Render/OmniverseKit/HydraTextures/Replicator_08>,
+        ]
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+            uniform token sourceType = "raw"
+        }
+    }
+}
+
+over "OmniverseKit_Persp" (
+    prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (0.01, 10000000)
+    float exposure:fStop = 5
+    float exposure:iso = 50
+    float exposure:responsivity = 1.1026709
+    float exposure:time = 0.02
+    float focalLength = 18.147562
+    float focusDistance = 400
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -3.5274331653920505)
+    float3 xformOp:rotateXYZ = (54.73561, -6.3611094e-15, 135)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (5, 5, 5)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def Xform "World"
+{
+    def Xform "OpenFlex" (
+        prepend references = @./robots/openflex_integrated_robot/openflex_integrated_robot.usda@
+    )
+    {
+        over "Geometry"
+        {
+            over "base_link" (
+                prepend apiSchemas = ["PhysxArticulationAPI"]
+            )
+            {
+                float physxArticulation:sleepThreshold = 0
+                int physxArticulation:solverPositionIterationCount = 32
+                int physxArticulation:solverVelocityIterationCount = 4
+                float physxArticulation:stabilizationThreshold = 0
+
+                over "fl_steering_link"
+                {
+                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    over "fl_wheel_link"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+                }
+
+                over "fr_steering_link"
+                {
+                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    over "fr_wheel_link"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+                }
+
+                over "bl_steering_link"
+                {
+                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    over "bl_wheel_link"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+                }
+
+                over "br_steering_link"
+                {
+                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    over "br_wheel_link"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+                }
+
+                over "lift_carriage_link"
+                {
+                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    over "openarmx_left_link1"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                        over "openarmx_left_link2"
+                        {
+                            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                            over "openarmx_left_link3"
+                            {
+                                uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                over "openarmx_left_link4"
+                                {
+                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                    over "openarmx_left_link5"
+                                    {
+                                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                        over "openarmx_left_link6"
+                                        {
+                                            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                            over "openarmx_left_link7"
+                                            {
+                                                uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                over "openarmx_left_right_finger"
+                                                {
+                                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                }
+
+                                                over "openarmx_left_left_finger"
+                                                {
+                                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                }
+
+                                                def "OpenFlexRuntimeLinks"
+                                                {
+                                                    def Xform "openarmx_left_hand"
+                                                    {
+                                                        custom string urdf:name = "openarmx_left_hand"
+                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                        custom double3 xformOp:translate = (0, 0, 0.1001)
+                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                        def "OpenFlexRuntimeLinks"
+                                                        {
+                                                            def Xform "openarmx_left_hand_tcp"
+                                                            {
+                                                                custom string urdf:name = "openarmx_left_hand_tcp"
+                                                                custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                custom double3 xformOp:scale = (1, 1, 1)
+                                                                custom double3 xformOp:translate = (0, 0, 0.08)
+                                                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                def Xform "LeftWristCameraMount"
+                                                                {
+                                                                    custom quatd xformOp:orient = (0.30070579950427306, 3.998540080892181e-17, 0.9537169507482269, 4.2819420214969975e-17)
+                                                                    custom double3 xformOp:scale = (1, 1, 1)
+                                                                    custom double3 xformOp:translate = (0.0672052588340929, -0.01250108166453956, -0.061670653901868544)
+                                                                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                    def Xform "OpenFlexSensors"
+                                                                    {
+                                                                        def Camera "LeftHandColorCamera"
+                                                                        {
+                                                                            float2 clippingRange = (0.02, 100)
+                                                                            custom float exposure:iso = 50
+                                                                            float focalLength = 18.147562
+                                                                            float focusDistance = 4
+                                                                            custom float omni:sensor:tickRate = 30
+                                                                            custom string openflex:sensor:type = "rgb"
+                                                                            custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                            custom double3 xformOp:scale = (1, 1, 1)
+                                                                            custom double3 xformOp:translate = (0, 0, 0)
+                                                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                            def OmniGraph "ROS2_rgb_Graph"
+                                                                            {
+                                                                                token evaluationMode = "Automatic"
+                                                                                token evaluator:type = "execution"
+                                                                                token fabricCacheBacking = "StageWithoutHistory"
+                                                                                int2 fileFormatVersion = (1, 9)
+                                                                                token pipelineStage = "pipelineStageSimulation"
+
+                                                                                def OmniGraphNode "OnTick"
+                                                                                {
+                                                                                    token node:type = "omni.graph.action.OnPlaybackTick"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom double outputs:deltaSeconds
+                                                                                    custom double outputs:frame
+                                                                                    custom uint outputs:tick (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom double outputs:time
+                                                                                }
+
+                                                                                def OmniGraphNode "CreateRenderProduct"
+                                                                                {
+                                                                                    custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera> (
+                                                                                        customData = {
+                                                                                            dictionary omni = {
+                                                                                                dictionary graph = {
+                                                                                                    string relType = "target"
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    )
+                                                                                    custom bool inputs:enabled = 1
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera/ROS2_rgb_Graph/OnTick.outputs:tick>
+                                                                                    custom uint inputs:height = 240
+                                                                                    custom uint inputs:width = 320
+                                                                                    token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint outputs:execOut (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom token outputs:renderProductPath
+                                                                                }
+
+                                                                                def OmniGraphNode "CameraHelper"
+                                                                                {
+                                                                                    custom uint64 inputs:context
+                                                                                    prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera/ROS2_rgb_Graph/Context.outputs:context>
+                                                                                    custom bool inputs:enabled
+                                                                                    custom bool inputs:enableSemanticLabels
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:execOut>
+                                                                                    custom string inputs:frameId = "openarmx_left_hand"
+                                                                                    custom uint inputs:frameSkipCount
+                                                                                    custom string inputs:nodeNamespace
+                                                                                    custom string inputs:qosProfile
+                                                                                    custom uint64 inputs:queueSize
+                                                                                    custom token inputs:renderProductPath
+                                                                                    prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                                                    custom bool inputs:resetSimulationTimeOnStop
+                                                                                    custom string inputs:semanticLabelsTopicName
+                                                                                    custom float2 inputs:stereoOffset
+                                                                                    custom string inputs:topicName = "/openflex/openarmx_left_hand/left/color/image"
+                                                                                    custom token inputs:type = "rgb" (
+                                                                                        allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                                                    )
+                                                                                    custom bool inputs:useSystemTime
+                                                                                    custom token inputs:viewport
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                                                    int node:typeVersion = 2
+                                                                                }
+
+                                                                                def OmniGraphNode "Context"
+                                                                                {
+                                                                                    custom uchar inputs:domain_id
+                                                                                    custom bool inputs:useDomainIDEnvVar
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint64 outputs:context
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        def Camera "LeftHandDepthCamera"
+                                                                        {
+                                                                            float2 clippingRange = (0.02, 100)
+                                                                            custom float exposure:iso = 50
+                                                                            float focalLength = 18.147562
+                                                                            float focusDistance = 4
+                                                                            custom float omni:sensor:tickRate = 30
+                                                                            custom string openflex:sensor:type = "depth"
+                                                                            custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                            custom double3 xformOp:scale = (1, 1, 1)
+                                                                            custom double3 xformOp:translate = (0, 0, 0)
+                                                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                            def OmniGraph "ROS2_depth_Graph"
+                                                                            {
+                                                                                token evaluationMode = "Automatic"
+                                                                                token evaluator:type = "execution"
+                                                                                token fabricCacheBacking = "StageWithoutHistory"
+                                                                                int2 fileFormatVersion = (1, 9)
+                                                                                token pipelineStage = "pipelineStageSimulation"
+
+                                                                                def OmniGraphNode "OnTick"
+                                                                                {
+                                                                                    token node:type = "omni.graph.action.OnPlaybackTick"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom double outputs:deltaSeconds
+                                                                                    custom double outputs:frame
+                                                                                    custom uint outputs:tick (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom double outputs:time
+                                                                                }
+
+                                                                                def OmniGraphNode "CreateRenderProduct"
+                                                                                {
+                                                                                    custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera> (
+                                                                                        customData = {
+                                                                                            dictionary omni = {
+                                                                                                dictionary graph = {
+                                                                                                    string relType = "target"
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    )
+                                                                                    custom bool inputs:enabled = 1
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera/ROS2_depth_Graph/OnTick.outputs:tick>
+                                                                                    custom uint inputs:height = 240
+                                                                                    custom uint inputs:width = 320
+                                                                                    token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint outputs:execOut (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom token outputs:renderProductPath
+                                                                                }
+
+                                                                                def OmniGraphNode "CameraHelper"
+                                                                                {
+                                                                                    custom uint64 inputs:context
+                                                                                    prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera/ROS2_depth_Graph/Context.outputs:context>
+                                                                                    custom bool inputs:enabled
+                                                                                    custom bool inputs:enableSemanticLabels
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:execOut>
+                                                                                    custom string inputs:frameId = "openarmx_left_hand"
+                                                                                    custom uint inputs:frameSkipCount
+                                                                                    custom string inputs:nodeNamespace
+                                                                                    custom string inputs:qosProfile
+                                                                                    custom uint64 inputs:queueSize
+                                                                                    custom token inputs:renderProductPath
+                                                                                    prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_left_link1/openarmx_left_link2/openarmx_left_link3/openarmx_left_link4/openarmx_left_link5/openarmx_left_link6/openarmx_left_link7/OpenFlexRuntimeLinks/openarmx_left_hand/OpenFlexRuntimeLinks/openarmx_left_hand_tcp/LeftWristCameraMount/OpenFlexSensors/LeftHandDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                                                    custom bool inputs:resetSimulationTimeOnStop
+                                                                                    custom string inputs:semanticLabelsTopicName
+                                                                                    custom float2 inputs:stereoOffset
+                                                                                    custom string inputs:topicName = "/openflex/openarmx_left_hand/left/depth/image"
+                                                                                    custom token inputs:type = "depth" (
+                                                                                        allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                                                    )
+                                                                                    custom bool inputs:useSystemTime
+                                                                                    custom token inputs:viewport
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                                                    int node:typeVersion = 2
+                                                                                }
+
+                                                                                def OmniGraphNode "Context"
+                                                                                {
+                                                                                    custom uchar inputs:domain_id
+                                                                                    custom bool inputs:useDomainIDEnvVar
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint64 outputs:context
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                def Xform "OpenFlexCameraDebug"
+                                                                {
+                                                                    def Cone "LeftHandColorCone"
+                                                                    {
+                                                                        double height = 0.28
+                                                                        color3f[] primvars:displayColor = [(0.2, 0.6, 1)]
+                                                                        float[] primvars:displayOpacity = [0.22]
+                                                                        uniform token purpose = "guide"
+                                                                        double radius = 0.12
+                                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                                        custom double3 xformOp:translate = (0, 0, 0.09)
+                                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                                    }
+
+                                                                    def Cone "LeftHandDepthCone"
+                                                                    {
+                                                                        double height = 0.22
+                                                                        color3f[] primvars:displayColor = [(0.1, 0.85, 0.55)]
+                                                                        float[] primvars:displayOpacity = [0.22]
+                                                                        uniform token purpose = "guide"
+                                                                        double radius = 0.1
+                                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                                        custom double3 xformOp:translate = (0, 0, 0.09)
+                                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    over "openarmx_right_link1"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                        over "openarmx_right_link2"
+                        {
+                            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                            over "openarmx_right_link3"
+                            {
+                                uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                over "openarmx_right_link4"
+                                {
+                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                    over "openarmx_right_link5"
+                                    {
+                                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                        over "openarmx_right_link6"
+                                        {
+                                            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                            over "openarmx_right_link7"
+                                            {
+                                                uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                over "openarmx_right_right_finger"
+                                                {
+                                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                }
+
+                                                over "openarmx_right_left_finger"
+                                                {
+                                                    uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                }
+
+                                                def "OpenFlexRuntimeLinks"
+                                                {
+                                                    def Xform "openarmx_right_hand"
+                                                    {
+                                                        custom string urdf:name = "openarmx_right_hand"
+                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                        custom double3 xformOp:translate = (0, 0, 0.1001)
+                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                        def "OpenFlexRuntimeLinks"
+                                                        {
+                                                            def Xform "openarmx_right_hand_tcp"
+                                                            {
+                                                                custom string urdf:name = "openarmx_right_hand_tcp"
+                                                                custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                custom double3 xformOp:scale = (1, 1, 1)
+                                                                custom double3 xformOp:translate = (0, 0, 0.08)
+                                                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                def Xform "RightWristCameraMount"
+                                                                {
+                                                                    custom quatd xformOp:orient = (-0.3007057995042731, -7.964525969976535e-17, -0.9537169507482269, -7.681124029371718e-17)
+                                                                    custom double3 xformOp:scale = (1, 1, 1)
+                                                                    custom double3 xformOp:translate = (0.06721, -0.0125, -0.06167)
+                                                                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                    def Xform "OpenFlexSensors"
+                                                                    {
+                                                                        def Camera "RightHandColorCamera"
+                                                                        {
+                                                                            float2 clippingRange = (0.02, 100)
+                                                                            custom float exposure:iso = 50
+                                                                            float focalLength = 18.147562
+                                                                            float focusDistance = 4
+                                                                            custom float omni:sensor:tickRate = 30
+                                                                            custom string openflex:sensor:type = "rgb"
+                                                                            custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                            custom double3 xformOp:scale = (1, 1, 1)
+                                                                            custom double3 xformOp:translate = (0, 0, 0)
+                                                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                            def OmniGraph "ROS2_rgb_Graph"
+                                                                            {
+                                                                                token evaluationMode = "Automatic"
+                                                                                token evaluator:type = "execution"
+                                                                                token fabricCacheBacking = "StageWithoutHistory"
+                                                                                int2 fileFormatVersion = (1, 9)
+                                                                                token pipelineStage = "pipelineStageSimulation"
+
+                                                                                def OmniGraphNode "OnTick"
+                                                                                {
+                                                                                    token node:type = "omni.graph.action.OnPlaybackTick"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom double outputs:deltaSeconds
+                                                                                    custom double outputs:frame
+                                                                                    custom uint outputs:tick (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom double outputs:time
+                                                                                }
+
+                                                                                def OmniGraphNode "CreateRenderProduct"
+                                                                                {
+                                                                                    custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera> (
+                                                                                        customData = {
+                                                                                            dictionary omni = {
+                                                                                                dictionary graph = {
+                                                                                                    string relType = "target"
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    )
+                                                                                    custom bool inputs:enabled = 1
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera/ROS2_rgb_Graph/OnTick.outputs:tick>
+                                                                                    custom uint inputs:height = 240
+                                                                                    custom uint inputs:width = 320
+                                                                                    token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint outputs:execOut (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom token outputs:renderProductPath
+                                                                                }
+
+                                                                                def OmniGraphNode "CameraHelper"
+                                                                                {
+                                                                                    custom uint64 inputs:context
+                                                                                    prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera/ROS2_rgb_Graph/Context.outputs:context>
+                                                                                    custom bool inputs:enabled
+                                                                                    custom bool inputs:enableSemanticLabels
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:execOut>
+                                                                                    custom string inputs:frameId = "openarmx_right_hand"
+                                                                                    custom uint inputs:frameSkipCount
+                                                                                    custom string inputs:nodeNamespace
+                                                                                    custom string inputs:qosProfile
+                                                                                    custom uint64 inputs:queueSize
+                                                                                    custom token inputs:renderProductPath
+                                                                                    prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                                                    custom bool inputs:resetSimulationTimeOnStop
+                                                                                    custom string inputs:semanticLabelsTopicName
+                                                                                    custom float2 inputs:stereoOffset
+                                                                                    custom string inputs:topicName = "/openflex/openarmx_right_hand/right/color/image"
+                                                                                    custom token inputs:type = "rgb" (
+                                                                                        allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                                                    )
+                                                                                    custom bool inputs:useSystemTime
+                                                                                    custom token inputs:viewport
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                                                    int node:typeVersion = 2
+                                                                                }
+
+                                                                                def OmniGraphNode "Context"
+                                                                                {
+                                                                                    custom uchar inputs:domain_id
+                                                                                    custom bool inputs:useDomainIDEnvVar
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint64 outputs:context
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        def Camera "RightHandDepthCamera"
+                                                                        {
+                                                                            float2 clippingRange = (0.02, 100)
+                                                                            custom float exposure:iso = 50
+                                                                            float focalLength = 18.147562
+                                                                            float focusDistance = 4
+                                                                            custom float omni:sensor:tickRate = 30
+                                                                            custom string openflex:sensor:type = "depth"
+                                                                            custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                            custom double3 xformOp:scale = (1, 1, 1)
+                                                                            custom double3 xformOp:translate = (0, 0, 0)
+                                                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                                                            def OmniGraph "ROS2_depth_Graph"
+                                                                            {
+                                                                                token evaluationMode = "Automatic"
+                                                                                token evaluator:type = "execution"
+                                                                                token fabricCacheBacking = "StageWithoutHistory"
+                                                                                int2 fileFormatVersion = (1, 9)
+                                                                                token pipelineStage = "pipelineStageSimulation"
+
+                                                                                def OmniGraphNode "OnTick"
+                                                                                {
+                                                                                    token node:type = "omni.graph.action.OnPlaybackTick"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom double outputs:deltaSeconds
+                                                                                    custom double outputs:frame
+                                                                                    custom uint outputs:tick (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom double outputs:time
+                                                                                }
+
+                                                                                def OmniGraphNode "CreateRenderProduct"
+                                                                                {
+                                                                                    custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera> (
+                                                                                        customData = {
+                                                                                            dictionary omni = {
+                                                                                                dictionary graph = {
+                                                                                                    string relType = "target"
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    )
+                                                                                    custom bool inputs:enabled = 1
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera/ROS2_depth_Graph/OnTick.outputs:tick>
+                                                                                    custom uint inputs:height = 240
+                                                                                    custom uint inputs:width = 320
+                                                                                    token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint outputs:execOut (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    custom token outputs:renderProductPath
+                                                                                }
+
+                                                                                def OmniGraphNode "CameraHelper"
+                                                                                {
+                                                                                    custom uint64 inputs:context
+                                                                                    prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera/ROS2_depth_Graph/Context.outputs:context>
+                                                                                    custom bool inputs:enabled
+                                                                                    custom bool inputs:enableSemanticLabels
+                                                                                    custom uint inputs:execIn (
+                                                                                        customData = {
+                                                                                            bool isExecution = 1
+                                                                                        }
+                                                                                    )
+                                                                                    prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:execOut>
+                                                                                    custom string inputs:frameId = "openarmx_right_hand"
+                                                                                    custom uint inputs:frameSkipCount
+                                                                                    custom string inputs:nodeNamespace
+                                                                                    custom string inputs:qosProfile
+                                                                                    custom uint64 inputs:queueSize
+                                                                                    custom token inputs:renderProductPath
+                                                                                    prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/openarmx_right_link1/openarmx_right_link2/openarmx_right_link3/openarmx_right_link4/openarmx_right_link5/openarmx_right_link6/openarmx_right_link7/OpenFlexRuntimeLinks/openarmx_right_hand/OpenFlexRuntimeLinks/openarmx_right_hand_tcp/RightWristCameraMount/OpenFlexSensors/RightHandDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                                                    custom bool inputs:resetSimulationTimeOnStop
+                                                                                    custom string inputs:semanticLabelsTopicName
+                                                                                    custom float2 inputs:stereoOffset
+                                                                                    custom string inputs:topicName = "/openflex/openarmx_right_hand/right/depth/image"
+                                                                                    custom token inputs:type = "depth" (
+                                                                                        allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                                                    )
+                                                                                    custom bool inputs:useSystemTime
+                                                                                    custom token inputs:viewport
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                                                    int node:typeVersion = 2
+                                                                                }
+
+                                                                                def OmniGraphNode "Context"
+                                                                                {
+                                                                                    custom uchar inputs:domain_id
+                                                                                    custom bool inputs:useDomainIDEnvVar
+                                                                                    token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                                                    int node:typeVersion = 2
+                                                                                    custom uint64 outputs:context
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                def Xform "OpenFlexCameraDebug"
+                                                                {
+                                                                    def Cone "RightHandColorCone"
+                                                                    {
+                                                                        double height = 0.28
+                                                                        color3f[] primvars:displayColor = [(0.2, 0.6, 1)]
+                                                                        float[] primvars:displayOpacity = [0.22]
+                                                                        uniform token purpose = "guide"
+                                                                        double radius = 0.12
+                                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                                        custom double3 xformOp:translate = (0, 0, 0.09)
+                                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                                    }
+
+                                                                    def Cone "RightHandDepthCone"
+                                                                    {
+                                                                        double height = 0.22
+                                                                        color3f[] primvars:displayColor = [(0.1, 0.85, 0.55)]
+                                                                        float[] primvars:displayOpacity = [0.22]
+                                                                        uniform token purpose = "guide"
+                                                                        double radius = 0.1
+                                                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                                                        custom double3 xformOp:scale = (1, 1, 1)
+                                                                        custom double3 xformOp:translate = (0, 0, 0.09)
+                                                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    over "head_pitch_link"
+                    {
+                        uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                        over "head_yaw_link"
+                        {
+                            uniform token[] xformOpOrder = ["!resetXformStack!", "xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                            def Xform "HeadCameraMount"
+                            {
+                                custom quatd xformOp:orient = (0.7071067811865476, 0.7071067811865475, 0, 0)
+                                custom double3 xformOp:scale = (1, 1, 1)
+                                custom double3 xformOp:translate = (3.2669454571448986e-7, 0.06654808970820303, 0.053549590491657195)
+                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                def Xform "OpenFlexSensors"
+                                {
+                                    def Camera "HeadColorCamera"
+                                    {
+                                        float2 clippingRange = (0.02, 100)
+                                        custom float exposure:iso = 50
+                                        float focalLength = 18.147562
+                                        float focusDistance = 4
+                                        custom float omni:sensor:tickRate = 30
+                                        custom string openflex:sensor:type = "rgb"
+                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                        custom double3 xformOp:scale = (1, 1, 1)
+                                        custom double3 xformOp:translate = (0, 0, 0)
+                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                        def OmniGraph "ROS2_rgb_Graph"
+                                        {
+                                            token evaluationMode = "Automatic"
+                                            token evaluator:type = "execution"
+                                            token fabricCacheBacking = "StageWithoutHistory"
+                                            int2 fileFormatVersion = (1, 9)
+                                            token pipelineStage = "pipelineStageSimulation"
+
+                                            def OmniGraphNode "OnTick"
+                                            {
+                                                token node:type = "omni.graph.action.OnPlaybackTick"
+                                                int node:typeVersion = 2
+                                                custom double outputs:deltaSeconds
+                                                custom double outputs:frame
+                                                custom uint outputs:tick (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                custom double outputs:time
+                                            }
+
+                                            def OmniGraphNode "CreateRenderProduct"
+                                            {
+                                                custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera> (
+                                                    customData = {
+                                                        dictionary omni = {
+                                                            dictionary graph = {
+                                                                string relType = "target"
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                                custom bool inputs:enabled = 1
+                                                custom uint inputs:execIn (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera/ROS2_rgb_Graph/OnTick.outputs:tick>
+                                                custom uint inputs:height = 480
+                                                custom uint inputs:width = 640
+                                                token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                int node:typeVersion = 2
+                                                custom uint outputs:execOut (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                custom token outputs:renderProductPath
+                                            }
+
+                                            def OmniGraphNode "CameraHelper"
+                                            {
+                                                custom uint64 inputs:context
+                                                prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera/ROS2_rgb_Graph/Context.outputs:context>
+                                                custom bool inputs:enabled
+                                                custom bool inputs:enableSemanticLabels
+                                                custom uint inputs:execIn (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:execOut>
+                                                custom string inputs:frameId = "head_yaw_link"
+                                                custom uint inputs:frameSkipCount
+                                                custom string inputs:nodeNamespace
+                                                custom string inputs:qosProfile
+                                                custom uint64 inputs:queueSize
+                                                custom token inputs:renderProductPath
+                                                prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                custom bool inputs:resetSimulationTimeOnStop
+                                                custom string inputs:semanticLabelsTopicName
+                                                custom float2 inputs:stereoOffset
+                                                custom string inputs:topicName = "/openflex/head_yaw_link/head/color/image"
+                                                custom token inputs:type = "rgb" (
+                                                    allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                )
+                                                custom bool inputs:useSystemTime
+                                                custom token inputs:viewport
+                                                token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                int node:typeVersion = 2
+                                            }
+
+                                            def OmniGraphNode "Context"
+                                            {
+                                                custom uchar inputs:domain_id
+                                                custom bool inputs:useDomainIDEnvVar
+                                                token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                int node:typeVersion = 2
+                                                custom uint64 outputs:context
+                                            }
+                                        }
+                                    }
+
+                                    def Camera "HeadDepthCamera"
+                                    {
+                                        float2 clippingRange = (0.02, 100)
+                                        custom float exposure:iso = 50
+                                        float focalLength = 18.147562
+                                        float focusDistance = 4
+                                        custom float omni:sensor:tickRate = 30
+                                        custom string openflex:sensor:type = "depth"
+                                        custom quatd xformOp:orient = (1, 0, 0, 0)
+                                        custom double3 xformOp:scale = (1, 1, 1)
+                                        custom double3 xformOp:translate = (0, 0, 0)
+                                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                        def OmniGraph "ROS2_depth_Graph"
+                                        {
+                                            token evaluationMode = "Automatic"
+                                            token evaluator:type = "execution"
+                                            token fabricCacheBacking = "StageWithoutHistory"
+                                            int2 fileFormatVersion = (1, 9)
+                                            token pipelineStage = "pipelineStageSimulation"
+
+                                            def OmniGraphNode "OnTick"
+                                            {
+                                                token node:type = "omni.graph.action.OnPlaybackTick"
+                                                int node:typeVersion = 2
+                                                custom double outputs:deltaSeconds
+                                                custom double outputs:frame
+                                                custom uint outputs:tick (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                custom double outputs:time
+                                            }
+
+                                            def OmniGraphNode "CreateRenderProduct"
+                                            {
+                                                custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera> (
+                                                    customData = {
+                                                        dictionary omni = {
+                                                            dictionary graph = {
+                                                                string relType = "target"
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                                custom bool inputs:enabled = 1
+                                                custom uint inputs:execIn (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera/ROS2_depth_Graph/OnTick.outputs:tick>
+                                                custom uint inputs:height = 480
+                                                custom uint inputs:width = 640
+                                                token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                                int node:typeVersion = 2
+                                                custom uint outputs:execOut (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                custom token outputs:renderProductPath
+                                            }
+
+                                            def OmniGraphNode "CameraHelper"
+                                            {
+                                                custom uint64 inputs:context
+                                                prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera/ROS2_depth_Graph/Context.outputs:context>
+                                                custom bool inputs:enabled
+                                                custom bool inputs:enableSemanticLabels
+                                                custom uint inputs:execIn (
+                                                    customData = {
+                                                        bool isExecution = 1
+                                                    }
+                                                )
+                                                prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:execOut>
+                                                custom string inputs:frameId = "head_yaw_link"
+                                                custom uint inputs:frameSkipCount
+                                                custom string inputs:nodeNamespace
+                                                custom string inputs:qosProfile
+                                                custom uint64 inputs:queueSize
+                                                custom token inputs:renderProductPath
+                                                prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/lift_carriage_link/head_pitch_link/head_yaw_link/HeadCameraMount/OpenFlexSensors/HeadDepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                                custom bool inputs:resetSimulationTimeOnStop
+                                                custom string inputs:semanticLabelsTopicName
+                                                custom float2 inputs:stereoOffset
+                                                custom string inputs:topicName = "/openflex/head_yaw_link/head/depth/image"
+                                                custom token inputs:type = "depth" (
+                                                    allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                                )
+                                                custom bool inputs:useSystemTime
+                                                custom token inputs:viewport
+                                                token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                                int node:typeVersion = 2
+                                            }
+
+                                            def OmniGraphNode "Context"
+                                            {
+                                                custom uchar inputs:domain_id
+                                                custom bool inputs:useDomainIDEnvVar
+                                                token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                                int node:typeVersion = 2
+                                                custom uint64 outputs:context
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            over "Sensors"
+                            {
+                                over "HeadCamera"
+                                {
+                                    def Xform "OpenFlexCameraDebug"
+                                    {
+                                        def Cone "HeadColorCone"
+                                        {
+                                            double height = 0.42
+                                            color3f[] primvars:displayColor = [(1, 0.85, 0.15)]
+                                            float[] primvars:displayOpacity = [0.22]
+                                            uniform token purpose = "guide"
+                                            double radius = 0.18
+                                            custom quatd xformOp:orient = (0.7071067811865476, 0, -0.7071067811865476, 0)
+                                            custom double3 xformOp:scale = (1, 1, 1)
+                                            custom double3 xformOp:translate = (-0.5631, 0.0824, -0.1072)
+                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                        }
+
+                                        def Cone "HeadDepthCone"
+                                        {
+                                            double height = 0.39899999999999997
+                                            color3f[] primvars:displayColor = [(0.9, 0.6, 0.12)]
+                                            float[] primvars:displayOpacity = [0.22]
+                                            uniform token purpose = "guide"
+                                            double radius = 0.162
+                                            custom quatd xformOp:orient = (0.7071067811865476, 0, -0.7071067811865476, 0)
+                                            custom double3 xformOp:scale = (1, 1, 1)
+                                            custom double3 xformOp:translate = (-0.5631, 0.0824, -0.1072)
+                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                over "d435_link"
+                {
+                    def Xform "BaseCameraMount"
+                    {
+                        custom quatd xformOp:orient = (1, 0, -0, -0)
+                        custom double3 xformOp:scale = (1, 1, 1)
+                        custom double3 xformOp:translate = (52.70197540001398, 11.614151138492389, 2.6588854862820313)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                        def Xform "OpenFlexSensors"
+                        {
+                            def Camera "D435ColorCamera"
+                            {
+                                float2 clippingRange = (0.02, 100)
+                                custom float exposure:iso = 50
+                                float focalLength = 18.147562
+                                float focusDistance = 4
+                                custom float omni:sensor:tickRate = 30
+                                custom string openflex:sensor:type = "rgb"
+                                custom quatd xformOp:orient = (1, 0, 0, 0)
+                                custom double3 xformOp:scale = (1, 1, 1)
+                                custom double3 xformOp:translate = (0, 0, 0)
+                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                def OmniGraph "ROS2_rgb_Graph"
+                                {
+                                    token evaluationMode = "Automatic"
+                                    token evaluator:type = "execution"
+                                    token fabricCacheBacking = "StageWithoutHistory"
+                                    int2 fileFormatVersion = (1, 9)
+                                    token pipelineStage = "pipelineStageSimulation"
+
+                                    def OmniGraphNode "OnTick"
+                                    {
+                                        token node:type = "omni.graph.action.OnPlaybackTick"
+                                        int node:typeVersion = 2
+                                        custom double outputs:deltaSeconds
+                                        custom double outputs:frame
+                                        custom uint outputs:tick (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        custom double outputs:time
+                                    }
+
+                                    def OmniGraphNode "CreateRenderProduct"
+                                    {
+                                        custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera> (
+                                            customData = {
+                                                dictionary omni = {
+                                                    dictionary graph = {
+                                                        string relType = "target"
+                                                    }
+                                                }
+                                            }
+                                        )
+                                        custom bool inputs:enabled = 1
+                                        custom uint inputs:execIn (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera/ROS2_rgb_Graph/OnTick.outputs:tick>
+                                        custom uint inputs:height = 480
+                                        custom uint inputs:width = 640
+                                        token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                        int node:typeVersion = 2
+                                        custom uint outputs:execOut (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        custom token outputs:renderProductPath
+                                    }
+
+                                    def OmniGraphNode "CameraHelper"
+                                    {
+                                        custom uint64 inputs:context
+                                        prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera/ROS2_rgb_Graph/Context.outputs:context>
+                                        custom bool inputs:enabled
+                                        custom bool inputs:enableSemanticLabels
+                                        custom uint inputs:execIn (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:execOut>
+                                        custom string inputs:frameId = "d435_color_optical_frame"
+                                        custom uint inputs:frameSkipCount
+                                        custom string inputs:nodeNamespace
+                                        custom string inputs:qosProfile
+                                        custom uint64 inputs:queueSize
+                                        custom token inputs:renderProductPath
+                                        prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435ColorCamera/ROS2_rgb_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                        custom bool inputs:resetSimulationTimeOnStop
+                                        custom string inputs:semanticLabelsTopicName
+                                        custom float2 inputs:stereoOffset
+                                        custom string inputs:topicName = "/openflex/d435_color_optical_frame/color/image"
+                                        custom token inputs:type = "rgb" (
+                                            allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                        )
+                                        custom bool inputs:useSystemTime
+                                        custom token inputs:viewport
+                                        token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                        int node:typeVersion = 2
+                                    }
+
+                                    def OmniGraphNode "Context"
+                                    {
+                                        custom uchar inputs:domain_id
+                                        custom bool inputs:useDomainIDEnvVar
+                                        token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                        int node:typeVersion = 2
+                                        custom uint64 outputs:context
+                                    }
+                                }
+                            }
+
+                            def Camera "D435DepthCamera"
+                            {
+                                float2 clippingRange = (0.02, 100)
+                                custom float exposure:iso = 50
+                                float focalLength = 18.147562
+                                float focusDistance = 4
+                                custom float omni:sensor:tickRate = 30
+                                custom string openflex:sensor:type = "depth"
+                                custom quatd xformOp:orient = (1, 0, 0, 0)
+                                custom double3 xformOp:scale = (1, 1, 1)
+                                custom double3 xformOp:translate = (0, 0, 0)
+                                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                                def OmniGraph "ROS2_depth_Graph"
+                                {
+                                    token evaluationMode = "Automatic"
+                                    token evaluator:type = "execution"
+                                    token fabricCacheBacking = "StageWithoutHistory"
+                                    int2 fileFormatVersion = (1, 9)
+                                    token pipelineStage = "pipelineStageSimulation"
+
+                                    def OmniGraphNode "OnTick"
+                                    {
+                                        token node:type = "omni.graph.action.OnPlaybackTick"
+                                        int node:typeVersion = 2
+                                        custom double outputs:deltaSeconds
+                                        custom double outputs:frame
+                                        custom uint outputs:tick (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        custom double outputs:time
+                                    }
+
+                                    def OmniGraphNode "CreateRenderProduct"
+                                    {
+                                        custom rel inputs:cameraPrim = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera> (
+                                            customData = {
+                                                dictionary omni = {
+                                                    dictionary graph = {
+                                                        string relType = "target"
+                                                    }
+                                                }
+                                            }
+                                        )
+                                        custom bool inputs:enabled = 1
+                                        custom uint inputs:execIn (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera/ROS2_depth_Graph/OnTick.outputs:tick>
+                                        custom uint inputs:height = 480
+                                        custom uint inputs:width = 640
+                                        token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                                        int node:typeVersion = 2
+                                        custom uint outputs:execOut (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        custom token outputs:renderProductPath
+                                    }
+
+                                    def OmniGraphNode "CameraHelper"
+                                    {
+                                        custom uint64 inputs:context
+                                        prepend uint64 inputs:context.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera/ROS2_depth_Graph/Context.outputs:context>
+                                        custom bool inputs:enabled
+                                        custom bool inputs:enableSemanticLabels
+                                        custom uint inputs:execIn (
+                                            customData = {
+                                                bool isExecution = 1
+                                            }
+                                        )
+                                        prepend uint inputs:execIn.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:execOut>
+                                        custom string inputs:frameId = "d435_depth_optical_frame"
+                                        custom uint inputs:frameSkipCount
+                                        custom string inputs:nodeNamespace
+                                        custom string inputs:qosProfile
+                                        custom uint64 inputs:queueSize
+                                        custom token inputs:renderProductPath
+                                        prepend token inputs:renderProductPath.connect = </World/OpenFlex/Geometry/base_link/d435_link/BaseCameraMount/OpenFlexSensors/D435DepthCamera/ROS2_depth_Graph/CreateRenderProduct.outputs:renderProductPath>
+                                        custom bool inputs:resetSimulationTimeOnStop
+                                        custom string inputs:semanticLabelsTopicName
+                                        custom float2 inputs:stereoOffset
+                                        custom string inputs:topicName = "/openflex/d435_depth_optical_frame/depth/image"
+                                        custom token inputs:type = "depth" (
+                                            allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d"]
+                                        )
+                                        custom bool inputs:useSystemTime
+                                        custom token inputs:viewport
+                                        token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                                        int node:typeVersion = 2
+                                    }
+
+                                    def OmniGraphNode "Context"
+                                    {
+                                        custom uchar inputs:domain_id
+                                        custom bool inputs:useDomainIDEnvVar
+                                        token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                                        int node:typeVersion = 2
+                                        custom uint64 outputs:context
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    def Xform "OpenFlexCameraDebug"
+                    {
+                        def Cone "BaseColorCone"
+                        {
+                            double height = 0.42
+                            color3f[] primvars:displayColor = [(1, 0.45, 0.12)]
+                            float[] primvars:displayOpacity = [0.22]
+                            uniform token purpose = "guide"
+                            double radius = 0.18
+                            custom quatd xformOp:orient = (0.7071067811865476, 0, 0.7071067811865476, 0)
+                            custom double3 xformOp:scale = (1, 1, 1)
+                            custom double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Cone "BaseDepthCone"
+                        {
+                            double height = 0.39899999999999997
+                            color3f[] primvars:displayColor = [(0.85, 0.22, 0.18)]
+                            float[] primvars:displayOpacity = [0.22]
+                            uniform token purpose = "guide"
+                            double radius = 0.162
+                            custom quatd xformOp:orient = (0.7071067811865476, 0, 0.7071067811865476, 0)
+                            custom double3 xformOp:scale = (1, 1, 1)
+                            custom double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+                    }
+                }
+            }
+        }
+
+        over "Physics"
+        {
+            over "fl_steering_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "fr_steering_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "bl_steering_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "br_steering_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "lift_joint"
+            {
+                float state:linear:physics:position = 0
+                float state:linear:physics:velocity = 0
+            }
+
+            over "fl_wheel_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "fr_wheel_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "bl_wheel_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "br_wheel_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint1"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint1"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_head_pitch_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint2"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint2"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_head_yaw_joint"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint3"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint3"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint4"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint4"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint5"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint5"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint6"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint6"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_joint7"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_right_joint7"
+            {
+                float state:angular:physics:position = 0
+                float state:angular:physics:velocity = 0
+            }
+
+            over "openarmx_left_finger_joint1"
+            {
+                float state:linear:physics:position = 0
+                float state:linear:physics:velocity = 0
+            }
+
+            over "openarmx_left_finger_joint2"
+            {
+                float state:linear:physics:position = 0
+                float state:linear:physics:velocity = 0
+            }
+
+            over "openarmx_right_finger_joint1"
+            {
+                float state:linear:physics:position = 0
+                float state:linear:physics:velocity = 0
+            }
+
+            over "openarmx_right_finger_joint2"
+            {
+                float state:linear:physics:position = 0
+                float state:linear:physics:velocity = 0
+            }
+        }
+    }
+
+    def PhysicsScene "physicsScene" (
+        prepend apiSchemas = ["NewtonSceneAPI", "PhysxSceneAPI"]
+    )
+    {
+        vector3f physics:gravityDirection = (0, 0, -1)
+        float physics:gravityMagnitude = 9.81
+    }
+
+    def Xform "Environment"
+    {
+        def DomeLight "DomeLight"
+        {
+            color3f inputs:color = (1, 0.98, 0.95)
+            float inputs:intensity = 1800
+        }
+
+        def DistantLight "KeyLight"
+        {
+            float inputs:angle = 0.7
+            color3f inputs:color = (1, 0.97, 0.92)
+            float inputs:intensity = 3500
+        }
+
+        def Xform "GroundPlane"
+        {
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            float3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Mesh "geom" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                uniform bool doubleSided = 1
+                int[] faceVertexCounts = [4]
+                int[] faceVertexIndices = [0, 1, 2, 3]
+                rel material:binding = </World/Environment/GroundPlane/visualMaterial> (
+                    bindMaterialAs = "strongerThanDescendants"
+                )
+                normal3f[] normals = [(0, 0, 1), (0, 0, 1), (0, 0, 1), (0, 0, 1)]
+                point3f[] points = [(-40, -40, 0), (40, -40, 0), (40, 40, 0), (-40, 40, 0)]
+                color3f[] primvars:displayColor = [(0.5, 0.5, 0.5)]
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Plane "collisionPlane" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "MaterialBindingAPI"]
+            )
+            {
+                uniform token axis = "Z"
+                rel material:binding:physics = </World/Environment/PhysicsMaterials/ground> (
+                    bindMaterialAs = "strongerThanDescendants"
+                )
+                float physxCollision:contactOffset = 0.02
+                float physxCollision:restOffset = 0
+                uniform token purpose = "guide"
+                quatd xformOp:orient = (1, 0, 0, 0)
+                double3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            def Material "visualMaterial"
+            {
+                token outputs:mdl:displacement.connect = </World/Environment/GroundPlane/visualMaterial/Shader.outputs:out>
+                token outputs:mdl:surface.connect = </World/Environment/GroundPlane/visualMaterial/Shader.outputs:out>
+                token outputs:mdl:volume.connect = </World/Environment/GroundPlane/visualMaterial/Shader.outputs:out>
+
+                def Shader "Shader"
+                {
+                    uniform token info:implementationSource = "sourceAsset"
+                    uniform asset info:mdl:sourceAsset = @OmniPBR.mdl@
+                    uniform token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+                    bool inputs:project_uvw = 1
+                    token outputs:out (
+                        renderType = "material"
+                    )
+                }
+            }
+        }
+
+        def "PhysicsMaterials"
+        {
+            def Material "ground" (
+                prepend apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+            )
+            {
+                float physics:dynamicFriction = 0.85
+                float physics:restitution = 0
+                float physics:staticFriction = 1
+            }
+        }
+    }
+
+    def DomeLight "DomeLight"
+    {
+        color3f inputs:color = (1, 1, 1)
+        float inputs:exposure = 0
+        float inputs:intensity = 1000
+    }
+
+    def Plane "GroundPlane" (
+        prepend apiSchemas = ["PhysicsCollisionAPI", "MaterialBindingAPI"]
+    )
+    {
+        double length = 200
+        rel material:binding:physics = </World/Looks/material_ground> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        double width = 200
+    }
+
+    def Scope "Looks"
+    {
+        def Material "material_ground" (
+            prepend apiSchemas = ["PhysicsMaterialAPI"]
+        )
+        {
+            float physics:dynamicFriction = 1.3
+            float physics:restitution = 0
+            float physics:staticFriction = 1.6
+        }
+    }
+}
+
+over "OmniverseKit_Front" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.2722219e-14, 90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (5, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Right" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.41245e-30, 1.2722219e-14)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, -5, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Top" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (-1.2722219e-14, -7.016709e-15, -90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 5)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+def PhysicsScene "physicsScene" (
+    prepend apiSchemas = ["PhysxSceneAPI"]
+)
+{
+    vector3f physics:gravityDirection = (0, 0, -1)
+    float physics:gravityMagnitude = 9.81
+    uniform token physxScene:broadphaseType = "MBP"
+    bool physxScene:enableCCD = 1
+    bool physxScene:enableGPUDynamics = 0
+    bool physxScene:enableStabilization = 1
+    uniform token physxScene:solverType = "PGS"
+    uint physxScene:timeStepsPerSecond = 600
+}
+
+def "Graph"
+{
+    def OmniGraph "ROS_Clock"
+    {
+        token evaluationMode = "Automatic"
+        token evaluator:type = "execution"
+        token fabricCacheBacking = "StageWithoutHistory"
+        int2 fileFormatVersion = (1, 9)
+        token pipelineStage = "pipelineStageSimulation"
+
+        def OmniGraphNode "OnPlaybackTick"
+        {
+            token node:type = "omni.graph.action.OnPlaybackTick"
+            int node:typeVersion = 2
+            custom double outputs:deltaSeconds
+            custom double outputs:frame
+            custom uint outputs:tick (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double outputs:time
+        }
+
+        def OmniGraphNode "ReadSimTime"
+        {
+            custom uint64 inputs:referenceTimeDenominator
+            custom int64 inputs:referenceTimeNumerator
+            custom bool inputs:resetOnStop = 0
+            token node:type = "isaacsim.core.nodes.IsaacReadSimulationTime"
+            int node:typeVersion = 1
+            custom double outputs:simulationTime
+        }
+
+        def OmniGraphNode "PublishClock"
+        {
+            custom uint64 inputs:context
+            prepend uint64 inputs:context.connect = </Graph/ROS_Clock/Context.outputs:context>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/ROS_Clock/OnPlaybackTick.outputs:tick>
+            custom string inputs:nodeNamespace
+            custom string inputs:qosProfile
+            custom uint64 inputs:queueSize
+            custom double inputs:timeStamp
+            prepend double inputs:timeStamp.connect = </Graph/ROS_Clock/ReadSimTime.outputs:simulationTime>
+            custom string inputs:topicName
+            token node:type = "isaacsim.ros2.bridge.ROS2PublishClock"
+            int node:typeVersion = 1
+        }
+
+        def OmniGraphNode "Context"
+        {
+            custom uchar inputs:domain_id
+            custom bool inputs:useDomainIDEnvVar
+            token node:type = "isaacsim.ros2.bridge.ROS2Context"
+            int node:typeVersion = 2
+            custom uint64 outputs:context
+        }
+    }
+
+    def OmniGraph "OpenFleX_USD_ROS2_Control"
+    {
+        token evaluationMode = "Automatic"
+        token evaluator:type = "execution"
+        token fabricCacheBacking = "StageWithoutHistory"
+        int2 fileFormatVersion = (1, 9)
+        token pipelineStage = "pipelineStageOnDemand"
+
+        def OmniGraphNode "OnPhysicsStep"
+        {
+            token node:type = "isaacsim.core.nodes.OnPhysicsStep"
+            int node:typeVersion = 1
+            custom double outputs:deltaSimulationTime
+            custom double outputs:deltaSystemTime
+            custom uint outputs:step (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+        }
+
+        def OmniGraphNode "PublishJointState"
+        {
+            custom uint64 inputs:context
+            prepend uint64 inputs:context.connect = </Graph/OpenFleX_USD_ROS2_Control/Context.outputs:context>
+            custom double[] inputs:effort
+            prepend double[] inputs:effort.connect = </Graph/OpenFleX_USD_ROS2_Control/ArticulationState.outputs:measuredJointEfforts>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/OpenFleX_USD_ROS2_Control/OnPhysicsStep.outputs:step>
+            custom token inputs:header:frame_id
+            custom uint inputs:header:stamp:nanosec
+            prepend uint inputs:header:stamp:nanosec.connect = </Graph/OpenFleX_USD_ROS2_Control/TimeSplitter.outputs:nanoseconds>
+            custom int inputs:header:stamp:sec
+            prepend int inputs:header:stamp:sec.connect = </Graph/OpenFleX_USD_ROS2_Control/TimeSplitter.outputs:seconds>
+            custom string inputs:messageName = "JointState"
+            custom string inputs:messagePackage = "sensor_msgs"
+            custom string inputs:messageSubfolder
+            custom token[] inputs:name
+            prepend token[] inputs:name.connect = </Graph/OpenFleX_USD_ROS2_Control/ArticulationState.outputs:jointNames>
+            custom string inputs:nodeNamespace
+            custom double[] inputs:position
+            prepend double[] inputs:position.connect = </Graph/OpenFleX_USD_ROS2_Control/ArticulationState.outputs:jointPositions>
+            custom string inputs:qosProfile
+            custom uint64 inputs:queueSize
+            custom string inputs:topicName = "/openflex/joint_states"
+            custom double[] inputs:velocity
+            prepend double[] inputs:velocity.connect = </Graph/OpenFleX_USD_ROS2_Control/ArticulationState.outputs:jointVelocities>
+            token node:type = "isaacsim.ros2.bridge.ROS2Publisher"
+            int node:typeVersion = 1
+            custom uint outputs:execOut (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+        }
+
+        def OmniGraphNode "ArticulationState"
+        {
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/OpenFleX_USD_ROS2_Control/OnPhysicsStep.outputs:step>
+            custom int[] inputs:jointIndices
+            custom token[] inputs:jointNames
+            custom string inputs:robotPath
+            custom rel inputs:targetPrim = </World/OpenFlex/Geometry/base_link> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            token node:type = "isaacsim.core.nodes.IsaacArticulationState"
+            int node:typeVersion = 1
+            custom token[] outputs:jointNames
+            custom double[] outputs:jointPositions
+            custom double[] outputs:jointVelocities
+            custom double[] outputs:measuredJointEfforts
+            custom double3[] outputs:measuredJointForces
+            custom double3[] outputs:measuredJointTorques
+        }
+
+        def OmniGraphNode "SubscribeJointState"
+        {
+            custom uint64 inputs:context
+            prepend uint64 inputs:context.connect = </Graph/OpenFleX_USD_ROS2_Control/Context.outputs:context>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/OpenFleX_USD_ROS2_Control/OnPhysicsStep.outputs:step>
+            custom string inputs:messageName = "JointState"
+            custom string inputs:messagePackage = "sensor_msgs"
+            custom string inputs:messageSubfolder
+            custom string inputs:nodeNamespace
+            custom string inputs:qosProfile
+            custom uint64 inputs:queueSize
+            custom string inputs:topicName = "/openflex/joint_command"
+            token node:type = "isaacsim.ros2.bridge.ROS2Subscriber"
+            int node:typeVersion = 1
+            custom double[] outputs:effort
+            custom uint outputs:execOut (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom token outputs:header:frame_id
+            custom uint outputs:header:stamp:nanosec
+            custom int outputs:header:stamp:sec
+            custom token[] outputs:name
+            custom double[] outputs:position
+            custom double[] outputs:velocity
+        }
+
+        def OmniGraphNode "ArticulationController"
+        {
+            custom double[] inputs:effortCommand
+            prepend double[] inputs:effortCommand.connect = </Graph/OpenFleX_USD_ROS2_Control/SubscribeJointState.outputs:effort>
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/OpenFleX_USD_ROS2_Control/OnPhysicsStep.outputs:step>
+            custom int[] inputs:jointIndices
+            custom token[] inputs:jointNames
+            prepend token[] inputs:jointNames.connect = </Graph/OpenFleX_USD_ROS2_Control/SubscribeJointState.outputs:name>
+            custom double[] inputs:positionCommand
+            prepend double[] inputs:positionCommand.connect = </Graph/OpenFleX_USD_ROS2_Control/SubscribeJointState.outputs:position>
+            custom string inputs:robotPath
+            custom rel inputs:targetPrim = </World/OpenFlex/Geometry/base_link> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom double[] inputs:velocityCommand
+            prepend double[] inputs:velocityCommand.connect = </Graph/OpenFleX_USD_ROS2_Control/SubscribeJointState.outputs:velocity>
+            token node:type = "isaacsim.core.nodes.IsaacArticulationController"
+            int node:typeVersion = 1
+        }
+
+        def OmniGraphNode "ReadSimTime"
+        {
+            custom uint64 inputs:referenceTimeDenominator
+            custom int64 inputs:referenceTimeNumerator
+            custom bool inputs:resetOnStop
+            token node:type = "isaacsim.core.nodes.IsaacReadSimulationTime"
+            int node:typeVersion = 1
+            custom double outputs:simulationTime
+        }
+
+        def OmniGraphNode "TimeSplitter"
+        {
+            custom token inputs:time
+            prepend token inputs:time.connect = </Graph/OpenFleX_USD_ROS2_Control/ReadSimTime.outputs:simulationTime>
+            token node:type = "isaacsim.core.nodes.IsaacTimeSplitter"
+            int node:typeVersion = 1
+            custom uint outputs:microseconds
+            custom uint outputs:milliseconds
+            custom uint outputs:nanoseconds
+            custom int outputs:seconds
+        }
+
+        def OmniGraphNode "Context"
+        {
+            custom uchar inputs:domain_id
+            custom bool inputs:useDomainIDEnvVar
+            token node:type = "isaacsim.ros2.bridge.ROS2Context"
+            int node:typeVersion = 2
+            custom uint64 outputs:context
+        }
+    }
+
+}

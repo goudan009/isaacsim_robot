@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<library path="isaacsim_command_controller">
+  <class
+    name="isaacsim_command_controller/ExplicitTopicPositionController"
+    type="isaacsim_command_controller::ExplicitTopicPositionController"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Position command controller with an explicit absolute command_topic parameter.
+    </description>
+  </class>
+</library>
