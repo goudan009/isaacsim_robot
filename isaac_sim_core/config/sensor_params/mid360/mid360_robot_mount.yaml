@@ -12,6 +12,6 @@ sensor:
   default_profile: MID360_APPROX
   performance_profile: MID360_PERFORMANCE
   pointcloud_topic: /openflex/livox_frame/lidar
-  output_topic: /livox/lidar
+  output_topic: /livox/lidar_points
   imu_topic: /livox/imu
   frame_id: livox_frame

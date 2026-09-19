@@ -1,0 +1,37 @@
+/**:
+  ros__parameters:
+    # Isaac Sim connection
+    isaac_sim_host: "127.0.0.1"
+    isaac_sim_port: 24102
+    connection_timeout: 10.0
+
+    # Feature toggles
+    enable_sensors: true
+    enable_control: true
+    enable_tf: true
+
+    # Sensor configuration
+    sensor_profiles:
+      none:
+        cameras: []
+        lidars: []
+      minimal:
+        cameras: ["head_camera"]
+        lidars: []
+      full:
+        cameras: ["head_camera", "chest_camera", "left_wrist_camera", "right_wrist_camera"]
+        lidars: ["mid360"]
+
+    # Topic remapping
+    topics:
+      joint_states: "/joint_states"
+      cmd_vel: "/cmd_vel"
+      joint_command: "/joint_command"
+      camera_prefix: "/camera"
+      lidar_prefix: "/lidar"
+      imu: "/imu/data"
+
+    # Timing
+    control_rate_hz: 100.0
+    sensor_sync_timeout: 0.1
+    heartbeat_rate_hz: 1.0

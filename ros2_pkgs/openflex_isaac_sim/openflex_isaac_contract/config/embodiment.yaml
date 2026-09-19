@@ -1,0 +1,398 @@
+schema_version: 1
+robot:
+  id: openflex
+  display_name: OpenFleX
+  active_isaac_runtime: "6.0"
+  real_domain_id: 0
+  sim_domain_id: 49
+
+runtime:
+  isaac_sim_version: "6.0"
+  controller_manager_update_rate_hz: 90
+  source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate
+
+domains:
+  physical:
+    ros_domain_id: 0
+  simulation:
+    ros_domain_id: 49
+  source: OpenFleX deployment convention for Isaac Sim 6.0 VLA validation
+
+actions:
+  - name: base_twist
+    dimension: 3
+    command_type: geometry_msgs/msg/Twist
+    topic: /cmd_vel
+    controller: swerve_drive_controller
+    fields: [linear.x, linear.y, angular.z]
+    units: [m/s, m/s, rad/s]
+    limits:
+      - {minimum: -0.8, maximum: 0.8}
+      - {minimum: -0.8, maximum: 0.8}
+      - {minimum: -2.320037210795224, maximum: 2.320037210795224}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: >-
+      Simulation kinematic envelope from
+      openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml:
+      max_wheel_speed=0.8, and angular.z=0.8/sqrt(0.21^2+0.2735^2).
+      This is not a physical-hardware rating; combined-twist wheel-speed clipping
+      remains the responsibility of swerve_drive_controller.
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: lift_position
+    dimension: 1
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /lift_position_controller/commands
+    controller: lift_position_controller
+    joints: [lift_joint]
+    fields: [lift_joint]
+    units: [m]
+    limits:
+      - {minimum: -0.650, maximum: 0.300}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf lift_joint limit lower=-0.650 upper=0.300
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: lift_velocity
+    dimension: 1
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /velocity_controller/commands
+    controller: openflex_vla_contract_bridge
+    external_adapter: true
+    joints: [lift_joint]
+    joint_alias_of: lift_position
+    counts_toward_action: false
+    fields: [lift_joint]
+    units: [m/s]
+    limits:
+      - {minimum: -0.100, maximum: 0.100}
+    default_command_frequency_hz: 15
+    safety_clipping: clip_and_timeout_then_integrate_to_lift_position_controller
+    limit_source: openflex_isaac_bringup/scripts/vla_contract_bridge.py
+    frequency_source: OpenFlex VLA dataset default fps
+
+  - name: head_position
+    dimension: 2
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /head_forward_position_controller/commands
+    controller: head_forward_position_controller
+    joints: [openarmx_head_yaw_joint, openarmx_head_pitch_joint]
+    fields: [openarmx_head_yaw_joint, openarmx_head_pitch_joint]
+    units: [rad, rad]
+    limits:
+      - {minimum: -1.5708, maximum: 1.5708}
+      - {minimum: -1.5708, maximum: 1.5708}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf openarmx_head_yaw_joint and openarmx_head_pitch_joint limits
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: left_arm_position
+    dimension: 7
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /left_forward_position_controller/commands
+    controller: left_forward_position_controller
+    joints:
+      - openarmx_left_joint1
+      - openarmx_left_joint2
+      - openarmx_left_joint3
+      - openarmx_left_joint4
+      - openarmx_left_joint5
+      - openarmx_left_joint6
+      - openarmx_left_joint7
+    fields:
+      - openarmx_left_joint1
+      - openarmx_left_joint2
+      - openarmx_left_joint3
+      - openarmx_left_joint4
+      - openarmx_left_joint5
+      - openarmx_left_joint6
+      - openarmx_left_joint7
+    units: [rad, rad, rad, rad, rad, rad, rad]
+    limits:
+      - {minimum: -3.344396, maximum: 0.905604}
+      - {minimum: -3.2707963267948967, maximum: 0.1292036732051034}
+      - {minimum: -1.57, maximum: 1.57}
+      - {minimum: 0.0, maximum: 1.8}
+      - {minimum: -1.5, maximum: 1.5}
+      - {minimum: -0.75, maximum: 0.75}
+      - {minimum: -1.4, maximum: 1.4}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf openarmx_left_joint1 through openarmx_left_joint7 limits
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: left_gripper_position
+    dimension: 1
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /left_forward_position_controller/commands
+    controller: left_forward_position_controller
+    joints: [openarmx_left_finger_joint1]
+    fields: [openarmx_left_finger_joint1]
+    units: [rad]
+    limits:
+      - {minimum: 0.0, maximum: 0.044}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf openarmx_left_finger_joint1 limit
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: right_arm_position
+    dimension: 7
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /right_forward_position_controller/commands
+    controller: right_forward_position_controller
+    joints:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7
+    fields:
+      - openarmx_right_joint1
+      - openarmx_right_joint2
+      - openarmx_right_joint3
+      - openarmx_right_joint4
+      - openarmx_right_joint5
+      - openarmx_right_joint6
+      - openarmx_right_joint7
+    units: [rad, rad, rad, rad, rad, rad, rad]
+    limits:
+      - {minimum: -1.25, maximum: 3.0}
+      - {minimum: -0.1292036732051034, maximum: 3.2707963267948967}
+      - {minimum: -1.57, maximum: 1.57}
+      - {minimum: 0.0, maximum: 1.8}
+      - {minimum: -1.5, maximum: 1.5}
+      - {minimum: -0.75, maximum: 0.75}
+      - {minimum: -1.4, maximum: 1.4}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf openarmx_right_joint1 through openarmx_right_joint7 limits
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+  - name: right_gripper_position
+    dimension: 1
+    command_type: std_msgs/msg/Float64MultiArray
+    topic: /right_forward_position_controller/commands
+    controller: right_forward_position_controller
+    joints: [openarmx_right_finger_joint1]
+    fields: [openarmx_right_finger_joint1]
+    units: [rad]
+    limits:
+      - {minimum: 0.0, maximum: 0.044}
+    default_command_frequency_hz: 90
+    safety_clipping: clip_each_field_to_limits
+    limit_source: openflex_urdf/openflex_description/openflex_urdf.urdf openarmx_right_finger_joint1 limit
+    frequency_source: openflex_isaac_bringup/config/controllers.isaac.mobile_base.yaml controller_manager.ros__parameters.update_rate=90
+
+observations:
+  - name: joint_state
+    topic: /joint_states
+    type: sensor_msgs/msg/JointState
+    expected_frequency_hz: 90
+  - name: base_odom
+    topic: /odom
+    type: nav_msgs/msg/Odometry
+  - name: vla_base_odom
+    topic: /fastlio2/lio_odom
+    type: nav_msgs/msg/Odometry
+  - name: base_twist
+    topic: /odom
+    type: nav_msgs/msg/Odometry
+  - name: livox_lidar
+    topic: /livox/lidar
+    type: livox_ros_driver2/msg/CustomMsg
+  - name: lidar_points
+    topic: /livox/lidar_points
+    type: sensor_msgs/msg/PointCloud2
+  - name: livox_imu
+    topic: /livox/imu
+    type: sensor_msgs/msg/Imu
+
+observation_layout:
+  - observation: joint_state
+    dimension: 38
+    fields:
+      - position.lift_joint
+      - position.openarmx_head_yaw_joint
+      - position.openarmx_head_pitch_joint
+      - position.openarmx_left_joint1
+      - position.openarmx_left_joint2
+      - position.openarmx_left_joint3
+      - position.openarmx_left_joint4
+      - position.openarmx_left_joint5
+      - position.openarmx_left_joint6
+      - position.openarmx_left_joint7
+      - position.openarmx_left_finger_joint1
+      - position.openarmx_right_joint1
+      - position.openarmx_right_joint2
+      - position.openarmx_right_joint3
+      - position.openarmx_right_joint4
+      - position.openarmx_right_joint5
+      - position.openarmx_right_joint6
+      - position.openarmx_right_joint7
+      - position.openarmx_right_finger_joint1
+      - velocity.lift_joint
+      - velocity.openarmx_head_yaw_joint
+      - velocity.openarmx_head_pitch_joint
+      - velocity.openarmx_left_joint1
+      - velocity.openarmx_left_joint2
+      - velocity.openarmx_left_joint3
+      - velocity.openarmx_left_joint4
+      - velocity.openarmx_left_joint5
+      - velocity.openarmx_left_joint6
+      - velocity.openarmx_left_joint7
+      - velocity.openarmx_left_finger_joint1
+      - velocity.openarmx_right_joint1
+      - velocity.openarmx_right_joint2
+      - velocity.openarmx_right_joint3
+      - velocity.openarmx_right_joint4
+      - velocity.openarmx_right_joint5
+      - velocity.openarmx_right_joint6
+      - velocity.openarmx_right_joint7
+      - velocity.openarmx_right_finger_joint1
+    order:
+      - position.lift_joint
+      - position.openarmx_head_yaw_joint
+      - position.openarmx_head_pitch_joint
+      - position.openarmx_left_joint1
+      - position.openarmx_left_joint2
+      - position.openarmx_left_joint3
+      - position.openarmx_left_joint4
+      - position.openarmx_left_joint5
+      - position.openarmx_left_joint6
+      - position.openarmx_left_joint7
+      - position.openarmx_left_finger_joint1
+      - position.openarmx_right_joint1
+      - position.openarmx_right_joint2
+      - position.openarmx_right_joint3
+      - position.openarmx_right_joint4
+      - position.openarmx_right_joint5
+      - position.openarmx_right_joint6
+      - position.openarmx_right_joint7
+      - position.openarmx_right_finger_joint1
+      - velocity.lift_joint
+      - velocity.openarmx_head_yaw_joint
+      - velocity.openarmx_head_pitch_joint
+      - velocity.openarmx_left_joint1
+      - velocity.openarmx_left_joint2
+      - velocity.openarmx_left_joint3
+      - velocity.openarmx_left_joint4
+      - velocity.openarmx_left_joint5
+      - velocity.openarmx_left_joint6
+      - velocity.openarmx_left_joint7
+      - velocity.openarmx_left_finger_joint1
+      - velocity.openarmx_right_joint1
+      - velocity.openarmx_right_joint2
+      - velocity.openarmx_right_joint3
+      - velocity.openarmx_right_joint4
+      - velocity.openarmx_right_joint5
+      - velocity.openarmx_right_joint6
+      - velocity.openarmx_right_joint7
+      - velocity.openarmx_right_finger_joint1
+    units: [m, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, rad, m/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s, rad/s]
+    source: action joint order; position limits from openflex_urdf/openflex_description/openflex_urdf.urdf
+  - observation: base_odom
+    dimension: 13
+    fields: [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w, twist.linear.x, twist.linear.y, twist.linear.z, twist.angular.x, twist.angular.y, twist.angular.z]
+    order: [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w, twist.linear.x, twist.linear.y, twist.linear.z, twist.angular.x, twist.angular.y, twist.angular.z]
+    units: [m, m, m, unitless, unitless, unitless, unitless, m/s, m/s, m/s, rad/s, rad/s, rad/s]
+    source: nav_msgs/msg/Odometry field order selected by the contract
+  - observation: base_twist
+    dimension: 6
+    fields: [twist.linear.x, twist.linear.y, twist.linear.z, twist.angular.x, twist.angular.y, twist.angular.z]
+    order: [twist.linear.x, twist.linear.y, twist.linear.z, twist.angular.x, twist.angular.y, twist.angular.z]
+    units: [m/s, m/s, m/s, rad/s, rad/s, rad/s]
+    source: nav_msgs/msg/Odometry twist projection selected by the contract
+  - observation: livox_imu
+    dimension: 10
+    fields: [orientation.x, orientation.y, orientation.z, orientation.w, angular_velocity.x, angular_velocity.y, angular_velocity.z, linear_acceleration.x, linear_acceleration.y, linear_acceleration.z]
+    order: [orientation.x, orientation.y, orientation.z, orientation.w, angular_velocity.x, angular_velocity.y, angular_velocity.z, linear_acceleration.x, linear_acceleration.y, linear_acceleration.z]
+    units: [unitless, unitless, unitless, unitless, rad/s, rad/s, rad/s, m/s^2, m/s^2, m/s^2]
+    source: sensor_msgs/msg/Imu field order selected by the contract
+
+sensors:
+  - role: base_camera
+    frame_id: d435_color_optical_frame
+    color_topic: /cam_base/color/image
+    depth_topic: /cam_base/depth/image
+    camera_info_topic: /cam_base/color/camera_info
+    depth_camera_info_topic: /cam_base/depth/camera_info
+  - role: head_camera
+    frame_id: head_yaw_link
+    color_topic: /cam_head/color/image
+    depth_topic: /cam_head/depth/image
+    camera_info_topic: /cam_head/color/camera_info
+    depth_camera_info_topic: /cam_head/depth/camera_info
+  - role: left_wrist_camera
+    frame_id: openarmx_left_hand
+    color_topic: /cam_left/color/image
+    depth_topic: /cam_left/depth/image
+    camera_info_topic: /cam_left/color/camera_info
+    depth_camera_info_topic: /cam_left/depth/camera_info
+  - role: right_wrist_camera
+    frame_id: openarmx_right_hand
+    color_topic: /cam_right/color/image
+    depth_topic: /cam_right/depth/image
+    camera_info_topic: /cam_right/color/camera_info
+    depth_camera_info_topic: /cam_right/depth/camera_info
+  - role: lidar
+    frame_id: livox_frame
+    livox_custom_topic: /livox/lidar
+    pointcloud_topic: /livox/lidar_points
+    raw_pointcloud_topic: /openflex/livox_frame/lidar
+  - role: imu
+    frame_id: livox_frame
+    topic: /livox/imu
+  - role: odom
+    frame_id: odom
+    child_frame_id: base_link
+    topic: /odom
+
+ros2_topics:
+  - {name: /cmd_vel, type: geometry_msgs/msg/Twist, direction: command}
+  - {name: /joint_states, type: sensor_msgs/msg/JointState, direction: observation}
+  - {name: /odom, type: nav_msgs/msg/Odometry, direction: observation}
+  - {name: /fastlio2/lio_odom, type: nav_msgs/msg/Odometry, direction: observation}
+  - {name: /livox/lidar, type: livox_ros_driver2/msg/CustomMsg, direction: observation}
+  - {name: /livox/lidar_points, type: sensor_msgs/msg/PointCloud2, direction: observation}
+  - {name: /openflex/livox_frame/lidar, type: sensor_msgs/msg/PointCloud2, direction: observation}
+  - {name: /livox/imu, type: sensor_msgs/msg/Imu, direction: observation}
+  - {name: /cam_base/color/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_base/depth/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_base/color/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_base/depth/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_head/color/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_head/depth/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_head/color/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_head/depth/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_left/color/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_left/depth/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_left/color/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_left/depth/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_right/color/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_right/depth/image, type: sensor_msgs/msg/Image, direction: observation}
+  - {name: /cam_right/color/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_right/depth/camera_info, type: sensor_msgs/msg/CameraInfo, direction: observation}
+  - {name: /cam_base/color/image/compressed, type: sensor_msgs/msg/CompressedImage, direction: observation}
+  - {name: /cam_head/color/image/compressed, type: sensor_msgs/msg/CompressedImage, direction: observation}
+  - {name: /cam_left/color/image/compressed, type: sensor_msgs/msg/CompressedImage, direction: observation}
+  - {name: /cam_right/color/image/compressed, type: sensor_msgs/msg/CompressedImage, direction: observation}
+  - {name: /left_forward_position_controller/commands, type: std_msgs/msg/Float64MultiArray, direction: command}
+  - {name: /right_forward_position_controller/commands, type: std_msgs/msg/Float64MultiArray, direction: command}
+  - {name: /head_forward_position_controller/commands, type: std_msgs/msg/Float64MultiArray, direction: command}
+  - {name: /lift_position_controller/commands, type: std_msgs/msg/Float64MultiArray, direction: command}
+  - {name: /velocity_controller/commands, type: std_msgs/msg/Float64MultiArray, direction: command}
+
+controller_profiles:
+  ros2_physical_parity:
+    description: Real-compatible ROS 2 topic and controller names.
+    action_dimension: 22
+  behavior_benchmark:
+    description: Future OmniGibson-supported controller profile.
+    action_dimension: 22
+    status: planned

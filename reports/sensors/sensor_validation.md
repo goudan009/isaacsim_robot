@@ -206,7 +206,7 @@
 记录 raw PointCloud2 仿真时间频率 `10 Hz`、`100/100` 非空消息、平均约 `34,085` 点/帧；兼容
 `CustomMsg` 也记录为约 `10 Hz` 仿真时间频率和 `97` 条非空消息。
 
-已将该方案合并到 `ros2_pkgs/simulation_bridge/sensor_pkg/isaacsim_sensors/mid360.py`，独立场景
+已将该方案合并到 `ros2_pkgs/openflex_isaac_sim/openflex_isaac_sensors/openflex_isaac_sensors/mid360.py`，独立场景
 也已合并到 `isaac_sim_core/assets/environments/mid360_empty_stage.usda`。合并前发现一处偏差：
 独立 `direct` 图额外插入了 `OgnIsaacRunOneSimulationFrame`；历史通过图是
 `OnPlaybackTick → ROS2RtxLidarHelper` 直连。该偏差已修复，机器人侧 `helper` 也复用同一历史图，

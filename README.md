@@ -1,97 +1,163 @@
 # OpenFleX Isaac Sim Robot
 
-统一的 Isaac Sim 机器人仓库，位于 colcon 工作空间的 `src/isaacsim_robot`。
-机器人资产、传感器资产、ROS 2 控制接口、工具、测试和报告在同一个 Git 边界内维护。
+OpenFleX 的独立 Isaac Sim 6.0 + ROS 2 Humble 仿真仓库。机器人仿真资产、六个 ROS 2 包、
+接口合同、测试和运行报告都在本仓库维护，不再把仿真源码拼接到 `openflex_ws/src`。
 
-当前已完成阶段 1-3：
-
-1. 机器人本体资产和机器人专用场景。
-2. RealSense、MID360 资产、配置和独立传感器逻辑。
-3. 机器人 ROS 2 描述、控制器配置、接口合同和验证脚本。
-
-阶段 4“机器人 ROS 2 控制 + 传感器”的性能候选方案已完成验证，但正式产品化入口尚未验收。
-阶段 5 整机组合测试已达到入口性能线，下一步进行启动链路、动态外参、时间一致性和重复稳定性
-验收。雷达、SLAM 和旧的全身组合编排没有复制进本仓库。
-
-## 无传感器控制启动
-
-机器人控制入口为 `isaacsim_bringup robot_control_only.launch.py`。它只启动机器人 URDF、
-Isaac Sim 控制图、`controller_manager`、`robot_state_publisher` 和可选 RViz，不启动相机、
-雷达、IMU、传感器桥、SLAM 或兼容桥。
-
-```bash
-ros2 launch isaacsim_bringup robot_control_only.launch.py \
-  headless:=true rviz:=false
-```
-
-默认启动无传感器完整控制链：底盘、双臂、头部和升降控制器均会加载。用于隔离底盘性能时，
-显式传入 `start_upper_body:=false`。RViz 配置已包含底盘、双臂、头部和升降面板。
-
-默认 Isaac Sim 物理频率为 120 Hz，`controller_manager`（包含公共 `/joint_states` 发布链）调度目标为 90 Hz。两者不是同一个
-指标：前者是仿真步频，后者是 ROS 2 控制循环目标，最终性能必须以墙钟采样和控制响应验收。
-
-无传感器控制入口默认 `render_hz:=30`：该频率可满足诊断画面采集，同时完整机器人实测仍超过
-实时。需要更高刷新率的交互式 Isaac 视口时可显式传入 `render_hz:=60`，但该配置当前不满足
-RTF `1.0` 的实时线。
-
-当前实测记录见 [`reports/performance/robot_control_performance.md`](reports/performance/robot_control_performance.md)。
-其中 `/joint_states` 必须看测试节点对该 ROS 话题的直接接收频率；physics step rate 必须看
-由 `OnPhysicsStep` 触发的 `/openflex/joint_states` 仿真时间戳；RTF 必须由同一测量窗口的
-仿真时间差和墙钟时间差计算。三者不能用配置目标或 `/clock` 消息频率相互替代。没有真机
-ROS 进程时，也不能把真机 `/joint_states` 的 90 Hz 配置目标写成实测频率。
-
-当前结果统一见 [`reports/README.md`](reports/README.md)：默认无传感器完整控制已通过底盘、升降、
-头部和双臂的实际运动验证，实测 `/joint_states` 约 `90 Hz`、physics step rate `175.689 Hz`、
-RTF `1.464`；空场景 RTF 约 `1.977`。历史重试只保留原始证据，不复制到结论正文。
-
-## 目录
+## 仓库结构
 
 ```text
 isaacsim_robot/
-├── isaac_sim_core/       # USD、仿真组件和传感器/物理配置
-├── ros2_pkgs/             # colcon ROS 2 包
-│   ├── control/           # description、contract、bringup
-│   └── simulation_bridge/ # sensor_pkg
-├── tools/                 # 资产导出、校验和模型工具
-├── scripts/               # 仓库级脚本
-├── test/                  # sim unit、ROS 2 integration、migration tests
-├── reports/               # 精选迁移和性能结论
-├── docs/                  # 架构、运行和性能说明
-└── config/                # 工作空间级依赖清单
+├── isaac_sim_core/                  # USD、场景、机器人和传感器 canonical 配置
+├── ros2_pkgs/openflex_isaac_sim/    # 六个 ROS 2 包
+├── config/dependencies.repos        # 固定版本的第三方源码依赖
+├── docs/                            # 架构、运行和性能边界
+├── reports/                         # 可审阅的迁移、性能和运行证据
+├── test/                            # 静态、ROS 2 集成和性能测试
+└── tools/                           # 资产和模型工具
 ```
 
-ROS 2 包名为 `isaacsim_bringup`、`isaacsim_command_controller`、`isaacsim_description`、
-`isaacsim_embodiment_contract` 和 `isaacsim_sensors`；`ros2_pkgs` 下不使用旧仓库名称。
+ROS 2 包包括 `openflex_isaac_description`、`openflex_isaac_contract`、
+`openflex_isaac_controllers`、`openflex_isaac_sensors`、`openflex_isaac_bridge` 和
+`openflex_isaac_bringup`。旧 `ros2_pkgs/control`、`ros2_pkgs/simulation_bridge` 和
+`isaacsim_*` 包名已经移除。
 
-## 快速验证
+## 依赖边界
+
+本仓库是独立 Git 仓库，但运行时仍需要 ROS 2 underlay 提供 OpenFleX/硬件侧依赖，主要包括：
+
+- `livox_ros_driver2`
+- `swerve_controller`
+- `isaac_ros2_scripts`
+- `topic_based_ros2_control`
+
+`isaac_ros2_utils` 已固定在 `config/dependencies.repos` 中。不要把它的嵌套 `.git` 目录提交到
+本仓库。OpenFleX 主工作空间可以作为 underlay，但仿真源码只维护在本仓库。
+
+## 获取依赖
 
 ```bash
-source /opt/ros/humble/setup.bash
-colcon list
-colcon build --symlink-install
-source install/setup.bash
-python3 -m pytest -q test
+cd /home/1024201092WYH/Robot/isaacsim_robot
+mkdir -p .deps/src
+vcs import .deps/src < config/dependencies.repos
 ```
 
-需要 GPU/Isaac Sim 的运行验证时，使用 Isaac Sim 自带 Python，并先阅读
-[`docs/RUNTIME_PERFORMANCE_CN.md`](docs/RUNTIME_PERFORMANCE_CN.md)。实时性能不能用静态
-测试结果代替。
+如果 OpenFleX underlay 已经安装上述依赖，可以直接 source underlay，不必重复构建同名包。
 
-## 入口文档
+## 构建
 
-- [`docs/README_CN.md`](docs/README_CN.md)：文档索引和当前状态。
-- [`docs/ARCHITECTURE_CN.md`](docs/ARCHITECTURE_CN.md)：目录、边界和数据流。
-- [`docs/RUNTIME_PERFORMANCE_CN.md`](docs/RUNTIME_PERFORMANCE_CN.md)：机器人控制、RealSense、
-  MID360 的接入方式、性能保证方法和已知门槛。
-- [`docs/REPORTING_CN.md`](docs/REPORTING_CN.md)：固定报告、批次格式、测评线和后续 agent
-  的写入规则。
-- [`reports/migration/stages_1_to_3.md`](reports/migration/stages_1_to_3.md)：迁移和构建测试结论。
-- [`reports/sensors/sensor_validation.md`](reports/sensors/sensor_validation.md)：传感器功能、
-  ROS 2 互通和性能证据。
+```bash
+cd /home/1024201092WYH/Robot/isaacsim_robot
+source /opt/ros/humble/setup.bash
+source /home/1024201092WYH/Robot/openflex_ws/install/setup.bash
 
-## 维护规则
+colcon build --symlink-install \
+  --base-paths ros2_pkgs/openflex_isaac_sim \
+  --allow-overriding \
+    openflex_isaac_bridge \
+    openflex_isaac_bringup \
+    openflex_isaac_contract \
+    openflex_isaac_controllers \
+    openflex_isaac_description \
+    openflex_isaac_sensors
 
-- `isaac_sim_core/` 保存仿真核心和 canonical 配置；`ros2_pkgs/` 只保存可由 colcon 识别的包。
-- 测试代码放 `test/`，可审阅的结论放 `reports/`，原始日志和构建产物不提交。
-- 修改传感器或控制配置后，同时更新对应报告中的测量条件和判定。
-- 阶段 5 验收完成前，不实现未经验证的全身组合启动；继续使用三进程候选方案和固定报告记录结果。
+source install/setup.bash
+```
+
+独立仓库必须最后 source，确保六个 `openflex_isaac_*` 包解析到本仓库的 `install/`。
+
+## 启动
+
+```bash
+cd /home/1024201092WYH/Robot/isaacsim_robot
+source /opt/ros/humble/setup.bash
+source /home/1024201092WYH/Robot/openflex_ws/install/setup.bash
+source install/setup.bash
+
+export ISAACSIM_ROBOT_ROOT="$PWD"
+export ROS_DOMAIN_ID=49
+export ROS_LOCALHOST_ONLY=1
+
+ros2 launch openflex_isaac_bringup sim.launch.py \
+  headless:=true \
+  render_hz:=30 \
+  physics_hz:=120 \
+  sensor_profile:=full \
+  lidar_transport:=helper \
+  lidar_mount_mode:=parented \
+  lidar_object_id_map:=false \
+  livox_max_points:=15000 \
+  start_upper_body:=true \
+  isaac_path:=/home/1024201092WYH/isaacsim-6.0 \
+  api_port:=8085 \
+  ros_domain_id:=49
+```
+
+主 launch 不启动 RViz。第二个终端使用相同的 ROS 环境后运行：
+
+```bash
+ros2 launch openflex_isaac_bringup rviz_only.launch.py \
+  use_sim_time:=true ros_domain_id:=49
+```
+
+## 默认接口
+
+控制接口：
+
+- `/cmd_vel`
+- `/left_forward_position_controller/commands`
+- `/right_forward_position_controller/commands`
+- `/head_forward_position_controller/commands`
+- `/lift_position_controller/commands`
+- `/velocity_controller/commands`
+
+观测接口：
+
+- `/joint_states`
+- `/odom`
+- `/fastlio2/lio_odom`
+- `/livox/lidar`：`livox_ros_driver2/msg/CustomMsg`
+- `/livox/lidar_points`：`sensor_msgs/msg/PointCloud2`
+- `/openflex/livox_frame/lidar`：Isaac 原始 `PointCloud2`
+- `/scan`
+- `/livox/imu`
+- `/cam_{base,head,left,right}/{color,depth}/image`
+- `/cam_{base,head,left,right}/color/image/compressed`
+
+RViz 使用 `/livox/lidar_points`。需要 Livox CustomMsg 的 FAST-LIO 使用 `/livox/lidar`。
+
+## FAST-LIO 与 VLA 边界
+
+- `/livox/lidar` 的消息类型、逐点时间和 frame 已按真机 Livox 输入合同发布，可以接入要求
+  `livox_ros_driver2/msg/CustomMsg` 的 FAST-LIO。
+- `/fastlio2/lio_odom` 当前只是仿真 `/odom` 的兼容转发，不是 FAST-LIO 算法输出。
+- 仓库不自动启动 FAST-LIO，也不替代 FAST-LIO 参数、外参、时间同步和轨迹 ATE/RPE 验收。
+- 仓库提供 VLA 所需的观测和动作接口，但不包含数据集落盘、训练任务、checkpoint 和策略推理代码。
+- 因此当前可以接入上层 VLA 数据采集器，但不能仅凭本仓库宣称完整“采集-训练-推理”闭环已完成。
+
+## 验证
+
+```bash
+python3 -m pytest -q test
+
+source install/setup.bash
+ros2 run openflex_isaac_contract verify_embodiment_contract.py
+ros2 control list_controllers
+ros2 run openflex_isaac_bringup verify_vla_runtime.py \
+  --sample-seconds 15 \
+  --min-lidar-points 10000 \
+  --min-lidar-hz 5
+ros2 run openflex_isaac_bringup verify_camera_images.py
+```
+
+2026-09-19 的独立仓库实测中：六个控制器为 `active`；四路 VLA JPEG 约 15 Hz；
+`/livox/lidar` 在每帧 15,000 点时约 6.55 Hz；`/livox/lidar_points` 中位约 69,787 点、
+约 6.37 Hz。`nearRangeM=0.1` 修复了启动后长期只有约 500 点/帧的问题。
+
+报告保存在 `reports/runtime/full_chain/`。构建目录、生成 URDF、原始日志和第三方嵌套仓库不提交。
+
+## 详细文档
+
+- `docs/ARCHITECTURE_CN.md`
+- `docs/RUNTIME_PERFORMANCE_CN.md`
+- `docs/REPORTING_CN.md`
+- `ros2_pkgs/openflex_isaac_sim/openflex_isaac_bringup/README.md`

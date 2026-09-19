@@ -9,7 +9,7 @@ import unittest
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "bringup"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_bringup"
 SCRIPT_PATH = PACKAGE_DIR / "scripts" / "verify_mobile_base_runtime.py"
 
 

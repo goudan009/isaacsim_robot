@@ -11,7 +11,14 @@ import xml.etree.ElementTree as ET
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-GENERATOR = REPO_DIR / "ros2_pkgs" / "control" / "description" / "scripts" / "generate_isaac_urdf.py"
+GENERATOR = (
+    REPO_DIR
+    / "ros2_pkgs"
+    / "openflex_isaac_sim"
+    / "openflex_isaac_description"
+    / "scripts"
+    / "generate_isaac_urdf.py"
+)
 
 
 def load_generator_module():

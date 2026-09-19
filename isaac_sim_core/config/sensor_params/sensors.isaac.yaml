@@ -34,7 +34,7 @@ target_topics:
     depth_image: /cam_right/depth/image
     depth_camera_info: /cam_right/depth/camera_info
   lidar:
-    pointcloud: /livox/lidar
+    pointcloud: /livox/lidar_points
     scan: /scan
   imu:
     base: /imu

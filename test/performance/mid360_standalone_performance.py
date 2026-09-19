@@ -26,7 +26,14 @@ REPORT_PATH = ROOT / "reports" / "sensors" / "sensor_validation.md"
 REPORT_MARKER = "<!-- MID360_STANDALONE_BATCHES -->"
 RAW_TOPIC = "/openflex/livox_frame/lidar"
 CUSTOM_TOPIC = "/livox/lidar"
-BRIDGE_SCRIPT = ROOT / "ros2_pkgs" / "control" / "bringup" / "scripts" / "isaacsim_compat_bridge.py"
+BRIDGE_SCRIPT = (
+    ROOT
+    / "ros2_pkgs"
+    / "openflex_isaac_sim"
+    / "openflex_isaac_bringup"
+    / "scripts"
+    / "isaacsim_compat_bridge.py"
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -91,7 +98,12 @@ def _worker(args: argparse.Namespace) -> int:
         encoding="utf-8",
     )
 
-    sensor_package = ROOT / "ros2_pkgs" / "simulation_bridge" / "sensor_pkg"
+    sensor_package = (
+        ROOT
+        / "ros2_pkgs"
+        / "openflex_isaac_sim"
+        / "openflex_isaac_sensors"
+    )
     if str(sensor_package) not in sys.path:
         sys.path.insert(0, str(sensor_package))
 
@@ -218,7 +230,7 @@ def _worker(args: argparse.Namespace) -> int:
         settings.set("/exts/omni.replicator.srtx/enabled", False)
         settings.set("/renderer/multiGpu/enabled", False)
 
-        from isaacsim_sensors.mid360 import create_standalone_mid360
+        from openflex_isaac_sensors.mid360 import create_standalone_mid360
 
         stage_utils.open_stage(str(args.stage))
         for _ in range(3):
@@ -536,14 +548,22 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 def _existing_isaac_processes(domain_id: int) -> list[str]:
     """Return unrelated Isaac processes so a benchmark cannot hide contention."""
     result = subprocess.run(
-        ["ps", "-eo", "pid=,args="], check=False, text=True, capture_output=True
+        ["ps", "-eo", "pid=,comm=,args="], check=False, text=True, capture_output=True
     )
     this_pid = str(os.getpid())
     matches = []
     for line in result.stdout.splitlines():
-        if "isaacsim" not in line.lower() and "start_robot_control_sim.py" not in line:
+        fields = line.strip().split(maxsplit=2)
+        if len(fields) < 3:
             continue
-        if this_pid in line:
+        pid, command, arguments = fields
+        if pid == this_pid:
+            continue
+        arguments_lower = arguments.lower()
+        is_kit_python = command == "python" and "/kit/python" in arguments_lower
+        is_robot_launcher = "start_robot_control_sim.py" in arguments
+        is_isaac_launcher = command in {"isaac-sim.sh", "python.sh"} and "isaacsim" in arguments_lower
+        if not (is_kit_python or is_robot_launcher or is_isaac_launcher):
             continue
         matches.append(line.strip())
     return matches

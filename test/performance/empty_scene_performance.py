@@ -77,10 +77,10 @@ def _default_isaac_path() -> Path:
 def _resolve_runtime_paths() -> tuple[Path, Path, Path]:
     from ament_index_python.packages import get_package_prefix, get_package_share_directory
 
-    package_prefix = Path(get_package_prefix("isaacsim_bringup"))
-    adapter = package_prefix / "lib" / "isaacsim_bringup" / "start_robot_control_sim.py"
+    package_prefix = Path(get_package_prefix("openflex_isaac_bringup"))
+    adapter = package_prefix / "lib" / "openflex_isaac_bringup" / "start_robot_control_sim.py"
     scripts_share = Path(get_package_share_directory("isaac_ros2_scripts"))
-    stage = Path(get_package_share_directory("isaacsim_bringup")) / "config" / "empty_stage.usd"
+    stage = Path(get_package_share_directory("openflex_isaac_bringup")) / "config" / "empty_stage.usd"
     return adapter, scripts_share, stage
 
 

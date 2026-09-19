@@ -37,14 +37,14 @@ LIDAR_REPLICA_SCRIPT = ROOT / "isaac_sim_core" / "scenarios" / "robot_lidar_repl
 RELAY_SCRIPT = ROOT / "test" / "performance" / "robot_state_snapshot_relay.py"
 LIDAR_RESTAMPER_SCRIPT = ROOT / "test" / "performance" / "pointcloud_authority_restamper.py"
 CAMERA_STREAMS = {
-    "base_rgb": "/openflex/sensors/cam_base/color/image",
-    "base_depth": "/openflex/sensors/cam_base/depth/image",
-    "head_rgb": "/openflex/sensors/cam_head/color/image",
-    "head_depth": "/openflex/sensors/cam_head/depth/image",
-    "left_wrist_rgb": "/openflex/sensors/cam_left/color/image",
-    "left_wrist_depth": "/openflex/sensors/cam_left/depth/image",
-    "right_wrist_rgb": "/openflex/sensors/cam_right/color/image",
-    "right_wrist_depth": "/openflex/sensors/cam_right/depth/image",
+    "base_rgb": "/cam_base/color/image",
+    "base_depth": "/cam_base/depth/image",
+    "head_rgb": "/cam_head/color/image",
+    "head_depth": "/cam_head/depth/image",
+    "left_wrist_rgb": "/cam_left/color/image",
+    "left_wrist_depth": "/cam_left/depth/image",
+    "right_wrist_rgb": "/cam_right/color/image",
+    "right_wrist_depth": "/cam_right/depth/image",
 }
 DEFAULT_LIDAR_TOPIC = "/openflex/livox_frame/lidar"
 
@@ -121,8 +121,8 @@ def _wait_for_lidar(node: FullControlNode, replica: subprocess.Popen[str], timeo
 
 def _authority_command(args: argparse.Namespace) -> list[str]:
     command = [
-        "ros2", "launch", "isaacsim_bringup", "robot_control_only.launch.py",
-        "headless:=true", "rviz:=false", "camera_profile:=none",
+        "ros2", "launch", "openflex_isaac_bringup", "robot_control_only.launch.py",
+        "headless:=true", "camera_profile:=none",
         f"physics_hz:={args.physics_hz}", f"render_hz:={args.authority_render_hz}",
         f"api_port:={args.api_port}",
     ]

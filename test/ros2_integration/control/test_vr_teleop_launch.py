@@ -6,7 +6,7 @@ import unittest
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "bringup"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_bringup"
 LAUNCH_FILE = PACKAGE_DIR / "launch" / "vr_teleop.launch.py"
 
 
@@ -21,7 +21,7 @@ class VrTeleopLaunchTest(unittest.TestCase):
 
         for package, executable in (
             ("openflex_vr_bridge", "pico_pose_bridge_node"),
-            ("isaacsim_bringup", "isaacsim_vr_arm_node.py"),
+            ("openflex_isaac_bringup", "isaacsim_vr_arm_node.py"),
             ("openarmx_head_teleop_vr_pico", "head_teleop_node"),
             ("swerve_bringup", "vr_teleop_node"),
             ("swerve_bringup", "vr_lift_control_node"),

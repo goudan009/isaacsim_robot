@@ -2,6 +2,8 @@
 build/
 install/
 log/
+.deps/
+/isaac_ros2_utils/
 
 # Python caches and test outputs
 __pycache__/
@@ -36,3 +38,7 @@ reports/runtime/generated/
 .vscode/
 .DS_Store
 *.swp
+
+# Removed pre-standalone package trees may still contain local backup files.
+/ros2_pkgs/control/
+/ros2_pkgs/simulation_bridge/

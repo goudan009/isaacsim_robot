@@ -13,8 +13,8 @@ import unittest
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "contract"
-BRINGUP_DIR = REPO_DIR / "ros2_pkgs" / "control" / "bringup"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_contract"
+BRINGUP_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_bringup"
 SENSORS_CONFIG = REPO_DIR / "isaac_sim_core" / "config" / "sensor_params" / "sensors.isaac.yaml"
 SCRIPT_PATH = PACKAGE_DIR / "scripts" / "verify_embodiment_contract.py"
 sys.path.insert(0, str(PACKAGE_DIR))
@@ -35,12 +35,12 @@ class VerifyOpenFlexContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             prefix = Path(temporary_directory) / "install"
             site_packages = prefix / "lib" / "python3.10" / "site-packages"
-            source_python_package = PACKAGE_DIR / "isaacsim_embodiment_contract"
-            installed_package = site_packages / "isaacsim_embodiment_contract"
+            source_python_package = PACKAGE_DIR / "openflex_isaac_contract"
+            installed_package = site_packages / "openflex_isaac_contract"
             installed_script = (
-                prefix / "lib" / "isaacsim_embodiment_contract" / "verify_embodiment_contract.py"
+                prefix / "lib" / "openflex_isaac_contract" / "verify_embodiment_contract.py"
             )
-            contract_config = prefix / "share" / "isaacsim_embodiment_contract" / "config"
+            contract_config = prefix / "share" / "openflex_isaac_contract" / "config"
             package_index = prefix / "share" / "ament_index" / "resource_index" / "packages"
 
             shutil.copytree(source_python_package, installed_package)
@@ -49,7 +49,7 @@ class VerifyOpenFlexContractTest(unittest.TestCase):
             contract_config.mkdir(parents=True)
             shutil.copy2(PACKAGE_DIR / "config" / "embodiment.yaml", contract_config)
             package_index.mkdir(parents=True)
-            (package_index / "isaacsim_embodiment_contract").touch()
+            (package_index / "openflex_isaac_contract").touch()
 
             environment = os.environ.copy()
             environment["AMENT_PREFIX_PATH"] = str(prefix)
@@ -71,7 +71,7 @@ class VerifyOpenFlexContractTest(unittest.TestCase):
             self.assertEqual(result.returncode, 1, output)
             self.assertNotIn("Traceback", output)
             self.assertIn("controllers.isaac.mobile_base.yaml", output)
-            self.assertIn("isaacsim_bringup", output)
+            self.assertIn("openflex_isaac_bringup", output)
             self.assertIn("--controllers", output)
             self.assertIn("--sensors", output)
 
@@ -79,13 +79,13 @@ class VerifyOpenFlexContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             prefix = Path(temporary_directory) / "install"
             site_packages = prefix / "lib" / "python3.10" / "site-packages"
-            source_python_package = PACKAGE_DIR / "isaacsim_embodiment_contract"
-            installed_package = site_packages / "isaacsim_embodiment_contract"
+            source_python_package = PACKAGE_DIR / "openflex_isaac_contract"
+            installed_package = site_packages / "openflex_isaac_contract"
             installed_script = (
-                prefix / "lib" / "isaacsim_embodiment_contract" / "verify_embodiment_contract.py"
+                prefix / "lib" / "openflex_isaac_contract" / "verify_embodiment_contract.py"
             )
-            contract_config = prefix / "share" / "isaacsim_embodiment_contract" / "config"
-            bringup_config = prefix / "share" / "isaacsim_bringup" / "config"
+            contract_config = prefix / "share" / "openflex_isaac_contract" / "config"
+            bringup_config = prefix / "share" / "openflex_isaac_bringup" / "config"
             package_index = prefix / "share" / "ament_index" / "resource_index" / "packages"
 
             self.assertTrue(source_python_package.is_dir())
@@ -101,7 +101,7 @@ class VerifyOpenFlexContractTest(unittest.TestCase):
             )
             shutil.copy2(SENSORS_CONFIG, bringup_config)
             package_index.mkdir(parents=True)
-            for package_name in ("isaacsim_embodiment_contract", "isaacsim_bringup"):
+            for package_name in ("openflex_isaac_contract", "openflex_isaac_bringup"):
                 (package_index / package_name).touch()
 
             environment = os.environ.copy()

@@ -22,7 +22,14 @@ from sensor_msgs.msg import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SENSOR_SCRIPT = ROOT / "ros2_pkgs" / "simulation_bridge" / "sensor_pkg" / "scripts" / "realsense_standalone.py"
+SENSOR_SCRIPT = (
+    ROOT
+    / "ros2_pkgs"
+    / "openflex_isaac_sim"
+    / "openflex_isaac_sensors"
+    / "scripts"
+    / "realsense_standalone.py"
+)
 SENSOR_CONFIG_ROOT = ROOT / "isaac_sim_core" / "config" / "sensor_params" / "realsense"
 RAW_ROOT = ROOT / "reports" / "sensors" / "raw"
 REPORT_PATH = ROOT / "reports" / "sensors" / "sensor_validation.md"

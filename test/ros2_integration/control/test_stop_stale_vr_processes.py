@@ -8,7 +8,7 @@ import unittest
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "bringup"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_bringup"
 SCRIPT_PATH = PACKAGE_DIR / "scripts" / "stop_stale_vr_processes.py"
 SPEC = importlib.util.spec_from_file_location("stop_stale_vr_processes", SCRIPT_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
@@ -30,7 +30,7 @@ class StopStaleVrProcessesTest(unittest.TestCase):
             self._write_process(
                 proc_root,
                 103,
-                ["ros2", "launch", "isaacsim_bringup", "vr_teleop.launch.py"],
+                ["ros2", "launch", "openflex_isaac_bringup", "vr_teleop.launch.py"],
             )
             self._write_process(proc_root, 104, ["/opt/ws/pico_pose_bridge_node"])
 

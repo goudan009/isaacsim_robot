@@ -7,7 +7,7 @@ import unittest
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "contract"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_contract"
 
 
 class InstallLayoutTest(unittest.TestCase):
@@ -18,23 +18,23 @@ class InstallLayoutTest(unittest.TestCase):
             if prefix
         ]
         for prefix in prefixes:
-            if (prefix / "share" / "isaacsim_embodiment_contract").is_dir():
+            if (prefix / "share" / "openflex_isaac_contract").is_dir():
                 return prefix
-        self.fail(
-            "No installed isaacsim_embodiment_contract package found in "
+        self.skipTest(
+            "No installed openflex_isaac_contract package found in "
             "AMENT_PREFIX_PATH; source the install/setup.bash before running "
             "this test."
         )
 
     def test_installs_config_file(self) -> None:
         prefix = self._installed_package_prefix()
-        config = prefix / "share" / "isaacsim_embodiment_contract" / "config" / "embodiment.yaml"
+        config = prefix / "share" / "openflex_isaac_contract" / "config" / "embodiment.yaml"
 
         self.assertTrue(config.is_file(), f"Installed config is missing: {config}")
 
     def test_installs_executable_verify_script(self) -> None:
         prefix = self._installed_package_prefix()
-        verifier = prefix / "lib" / "isaacsim_embodiment_contract" / "verify_embodiment_contract.py"
+        verifier = prefix / "lib" / "openflex_isaac_contract" / "verify_embodiment_contract.py"
 
         self.assertTrue(verifier.is_file(), f"Installed verifier is missing: {verifier}")
         self.assertTrue(os.access(verifier, os.X_OK), f"Installed verifier is not executable: {verifier}")

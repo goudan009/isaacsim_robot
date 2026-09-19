@@ -4,7 +4,6 @@ from __future__ import annotations
 import importlib.util
 import os
 from pathlib import Path
-import re
 import sys
 import types
 import unittest
@@ -12,15 +11,9 @@ from unittest import mock
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "bringup"
+PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_bringup"
 LAUNCH_PATH = PACKAGE_DIR / "launch" / "rviz_only.launch.py"
-RVIZ_CONFIG_PATH = (
-    REPO_DIR.parent
-    / "openflex_integrated"
-    / "openarmx_integrated_description"
-    / "rviz"
-    / "integrated_robot.rviz"
-)
+RVIZ_CONFIG_PATH = PACKAGE_DIR / "rviz" / "robot_control_only.rviz"
 
 
 class _FakeAction:
@@ -36,6 +29,7 @@ def load_launch_module():
     launch_actions_module = types.ModuleType("launch.actions")
     launch_actions_module.DeclareLaunchArgument = _FakeAction
     launch_actions_module.OpaqueFunction = _FakeAction
+    launch_actions_module.SetEnvironmentVariable = _FakeAction
 
     launch_substitutions_module = types.ModuleType("launch.substitutions")
     launch_substitutions_module.LaunchConfiguration = _FakeAction
@@ -70,28 +64,15 @@ def load_launch_module():
 
 
 class RvizOnlyLaunchTest(unittest.TestCase):
-    def test_integrated_rviz_enables_rgb_camera_displays(self) -> None:
+    def test_rviz_declares_lidar_scan_and_odometry_displays(self) -> None:
         text = RVIZ_CONFIG_PATH.read_text(encoding="utf-8")
-        for name, topic in (
-            ("LeftWrist", "/cam_left/color/image"),
-            ("RightWrist", "/cam_right/color/image"),
-            ("Head", "/cam_head/color/image"),
-            ("Base", "/cam_base/color/image"),
-        ):
-            with self.subTest(name=name):
-                display = re.search(
-                    rf"- Class: rviz_default_plugins/Image\n"
-                    rf"\s+Enabled: (?P<enabled>\w+)\n"
-                    rf"(?:(?!- Class: rviz_default_plugins/Image).)*?"
-                    rf"\s+Name: {name}\n"
-                    rf"(?:(?!- Class: rviz_default_plugins/Image).)*?"
-                    rf"\s+Value: {re.escape(topic)}\n",
-                    text,
-                    re.DOTALL,
-                )
-                self.assertIsNotNone(display)
-                assert display is not None
-                self.assertEqual(display.group("enabled"), "true")
+
+        self.assertIn("Name: LivoxPointCloud", text)
+        self.assertIn("Value: /livox/lidar_points", text)
+        self.assertIn("Name: LaserScan", text)
+        self.assertIn("Value: /scan", text)
+        self.assertIn("Name: Odometry", text)
+        self.assertIn("Value: /odom", text)
 
     def test_rviz_display_error_explains_missing_gui_environment(self) -> None:
         launch_file = load_launch_module()

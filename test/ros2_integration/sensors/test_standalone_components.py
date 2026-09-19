@@ -6,24 +6,29 @@ from pathlib import Path
 import unittest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PACKAGE_ROOT = REPO_ROOT / "ros2_pkgs" / "simulation_bridge" / "sensor_pkg"
+PACKAGE_ROOT = (
+    REPO_ROOT
+    / "ros2_pkgs"
+    / "openflex_isaac_sim"
+    / "openflex_isaac_sensors"
+)
 sys.path.insert(0, str(PACKAGE_ROOT))
 
-from isaacsim_sensors.diagnostics import SensorDiagnostics
-from isaacsim_sensors.frame_packet import FramePacket
-from isaacsim_sensors.integration import (
+from openflex_isaac_sensors.diagnostics import SensorDiagnostics
+from openflex_isaac_sensors.frame_packet import FramePacket
+from openflex_isaac_sensors.integration import (
     load_mid360_config,
     load_realsense_config,
     resolve_robot_mount_path,
 )
-from isaacsim_sensors.mid360 import (
+from openflex_isaac_sensors.mid360 import (
     create_standalone_mid360,
     robot_lidar_graph_path,
     robot_sensor_root_path,
 )
-from isaacsim_sensors.mount import LocalPose, resolve_mount_prim_path
-from isaacsim_sensors.sinks import AsyncJsonlSink
-from isaacsim_sensors.transport import BoundedFrameQueue
+from openflex_isaac_sensors.mount import LocalPose, resolve_mount_prim_path
+from openflex_isaac_sensors.sinks import AsyncJsonlSink
+from openflex_isaac_sensors.transport import BoundedFrameQueue
 
 
 class StandaloneComponentsTest(unittest.TestCase):
@@ -31,7 +36,7 @@ class StandaloneComponentsTest(unittest.TestCase):
         self.assertTrue(callable(create_standalone_mid360))
 
     def test_mid360_helper_matches_historical_playback_graph(self) -> None:
-        source = (PACKAGE_ROOT / "isaacsim_sensors" / "mid360.py").read_text(encoding="utf-8")
+        source = (PACKAGE_ROOT / "openflex_isaac_sensors" / "mid360.py").read_text(encoding="utf-8")
         direct_source = source.split("\ndef _create_graph_owned_lidar_graph", 1)[0]
         self.assertIn(
             '("OnPlaybackTick", "omni.graph.action.OnPlaybackTick")',
@@ -47,7 +52,7 @@ class StandaloneComponentsTest(unittest.TestCase):
         )
 
     def test_standalone_default_transport_is_historical_direct_path(self) -> None:
-        source = (PACKAGE_ROOT / "isaacsim_sensors" / "mid360.py").read_text(encoding="utf-8")
+        source = (PACKAGE_ROOT / "openflex_isaac_sensors" / "mid360.py").read_text(encoding="utf-8")
         self.assertIn('transport: str = "direct"', source)
 
     def test_mid360_performance_audit_uses_sensor_data_qos(self) -> None:

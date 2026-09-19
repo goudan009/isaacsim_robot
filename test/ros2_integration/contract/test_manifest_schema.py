@@ -10,11 +10,16 @@ from unittest.mock import patch
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
-PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "control" / "contract"
+PACKAGE_DIR = (
+    REPO_DIR
+    / "ros2_pkgs"
+    / "openflex_isaac_sim"
+    / "openflex_isaac_contract"
+)
 sys.path.insert(0, str(PACKAGE_DIR))
 
-import isaacsim_embodiment_contract.manifest as manifest_module  # noqa: E402
-from isaacsim_embodiment_contract.manifest import (  # noqa: E402
+import openflex_isaac_contract.manifest as manifest_module  # noqa: E402
+from openflex_isaac_contract.manifest import (  # noqa: E402
     ManifestError,
     action_dimension,
     component_names,
@@ -46,6 +51,7 @@ class ManifestSchemaTest(unittest.TestCase):
             [
                 "base_twist",
                 "lift_position",
+                "lift_velocity",
                 "head_position",
                 "left_arm_position",
                 "left_gripper_position",
@@ -79,9 +85,9 @@ class ManifestSchemaTest(unittest.TestCase):
         manifest = load_manifest()
 
         self.assertIn("runtime", manifest)
-        self.assertEqual(manifest["runtime"]["isaac_sim_version"], "5.1")
+        self.assertEqual(manifest["runtime"]["isaac_sim_version"], "6.0")
         self.assertEqual(manifest["domains"]["physical"]["ros_domain_id"], 0)
-        self.assertEqual(manifest["domains"]["simulation"]["ros_domain_id"], 1)
+        self.assertEqual(manifest["domains"]["simulation"]["ros_domain_id"], 49)
 
         for action in manifest["actions"]:
             with self.subTest(action=action["name"]):
@@ -89,7 +95,7 @@ class ManifestSchemaTest(unittest.TestCase):
                 self.assertEqual(len(action["units"]), action["dimension"])
                 self.assertEqual(len(action["limits"]), action["dimension"])
                 self.assertGreater(action["default_command_frequency_hz"], 0)
-                self.assertEqual(action["safety_clipping"], "clip_each_field_to_limits")
+                self.assertTrue(action["safety_clipping"])
 
         base_twist = manifest["actions"][0]
         self.assertEqual(base_twist["limits"][0], {"minimum": -0.8, "maximum": 0.8})
@@ -211,13 +217,13 @@ class ManifestSchemaTest(unittest.TestCase):
                 / "lib"
                 / "python3.10"
                 / "site-packages"
-                / "isaacsim_embodiment_contract"
+                / "openflex_isaac_contract"
                 / "manifest.py"
             )
             manifest_path = (
                 install_prefix
                 / "share"
-                / "isaacsim_embodiment_contract"
+                / "openflex_isaac_contract"
                 / "config"
                 / "embodiment.yaml"
             )
@@ -229,20 +235,20 @@ class ManifestSchemaTest(unittest.TestCase):
 
     def test_default_manifest_path_resolves_ament_install_layout(self) -> None:
         with TemporaryDirectory() as temporary_directory:
-            package_prefix = Path(temporary_directory) / "install" / "isaacsim_embodiment_contract"
+            package_prefix = Path(temporary_directory) / "install" / "openflex_isaac_contract"
             module_path = (
                 package_prefix
                 / "local"
                 / "lib"
                 / "python3.10"
                 / "site-packages"
-                / "isaacsim_embodiment_contract"
+                / "openflex_isaac_contract"
                 / "manifest.py"
             )
             manifest_path = (
                 package_prefix
                 / "share"
-                / "isaacsim_embodiment_contract"
+                / "openflex_isaac_contract"
                 / "config"
                 / "embodiment.yaml"
             )

@@ -39,14 +39,14 @@ CAMERA_QOS = QoSProfile(
     reliability=ReliabilityPolicy.BEST_EFFORT,
 )
 CAMERA_STREAMS = {
-    "base_rgb": "/openflex/sensors/cam_base/color/image",
-    "base_depth": "/openflex/sensors/cam_base/depth/image",
-    "head_rgb": "/openflex/sensors/cam_head/color/image",
-    "head_depth": "/openflex/sensors/cam_head/depth/image",
-    "left_wrist_rgb": "/openflex/sensors/cam_left/color/image",
-    "left_wrist_depth": "/openflex/sensors/cam_left/depth/image",
-    "right_wrist_rgb": "/openflex/sensors/cam_right/color/image",
-    "right_wrist_depth": "/openflex/sensors/cam_right/depth/image",
+    "base_rgb": "/cam_base/color/image",
+    "base_depth": "/cam_base/depth/image",
+    "head_rgb": "/cam_head/color/image",
+    "head_depth": "/cam_head/depth/image",
+    "left_wrist_rgb": "/cam_left/color/image",
+    "left_wrist_depth": "/cam_left/depth/image",
+    "right_wrist_rgb": "/cam_right/color/image",
+    "right_wrist_depth": "/cam_right/depth/image",
 }
 
 
@@ -348,10 +348,9 @@ def _launch_command(
     command = [
         "ros2",
         "launch",
-        "isaacsim_bringup",
+        "openflex_isaac_bringup",
         "robot_control_only.launch.py",
         "headless:=true",
-        "rviz:=false",
         f"physics_hz:={physics_hz}",
         f"render_hz:={render_hz}",
         f"camera_profile:={camera_profile}",
@@ -730,9 +729,9 @@ def main() -> int:
     parser.add_argument("--lidar-transport", choices=("helper", "native"), default="helper")
     parser.add_argument(
         "--lidar-mount-mode",
-        choices=("follow", "fixed_kinematic", "fixed"),
-        default="fixed_kinematic",
-        help="MID360 pose mode: fixed kinematic root (safe default), fixed root, or experimental follow",
+        choices=("parented", "follow", "fixed_kinematic", "fixed"),
+        default="parented",
+        help="MID360 pose mode: robot-parented default, fixed diagnostics, or experimental follow",
     )
     parser.add_argument("--lidar-topic", default="/openflex/livox_frame/lidar")
     parser.add_argument("--min-lidar-hz", type=float, default=10.0)

@@ -34,9 +34,8 @@ WHEEL_JOINTS = ("fl_wheel_joint", "fr_wheel_joint", "bl_wheel_joint", "br_wheel_
 
 
 MODES = (
-    {"name": "headless_no_rviz", "headless": "true", "rviz": "false", "qt": ""},
-    {"name": "headless_rviz", "headless": "true", "rviz": "true", "qt": ""},
-    {"name": "gui_rviz", "headless": "false", "rviz": "true", "qt": ""},
+    {"name": "headless", "headless": "true"},
+    {"name": "gui", "headless": "false"},
 )
 
 
@@ -212,10 +211,9 @@ def _launch_command(
     command = [
         "ros2",
         "launch",
-        "isaacsim_bringup",
-        "robot_control_only.launch.py",
+        "openflex_isaac_bringup",
+        "sim.launch.py",
         f"headless:={mode['headless']}",
-        f"rviz:={mode['rviz']}",
         "start_upper_body:=false",
         # A/B switch: with simulation time enabled, controller-manager's
         # wall-clock receive rate is scaled by scene RTF. Keep the default
@@ -225,8 +223,6 @@ def _launch_command(
         f"physics_hz:={physics_hz}",
         f"api_port:={api_port}",
     ]
-    if mode["qt"]:
-        command.append(f"qt_qpa_platform:={mode['qt']}")
     return command
 
 
@@ -261,160 +257,6 @@ def _resource_snapshot(process: subprocess.Popen[str]) -> dict[str, Any]:
         result["gpu_error"] = str(error)
     return result
 
-
-def _rviz_state(process: subprocess.Popen[str], log_path: Path) -> dict[str, bool]:
-    """Report whether RViz started and survived the measurement window."""
-    started = False
-    failed = False
-    try:
-        log_text = log_path.read_text(encoding="utf-8", errors="replace")
-        started = bool(re.search(r"\[rviz2-[^\]]+\]: process started with pid", log_text))
-        failed = bool(re.search(r"\[rviz2-[^\]]+\]: process has died", log_text))
-    except OSError:
-        pass
-    try:
-        import psutil
-
-        root = psutil.Process(process.pid)
-        alive = any(
-            "rviz2" in " ".join(child.cmdline())
-            for child in root.children(recursive=True)
-            if child.is_running()
-        )
-    except Exception:
-        alive = False
-    return {"started": started, "failed": failed, "alive": alive, "survived": started and not failed}
-
-
-def _tail(path: Path, limit: int = 80) -> str:
-    try:
-        return "\n".join(path.read_text(encoding="utf-8", errors="replace").splitlines()[-limit:])
-    except OSError as error:
-        return f"unable to read launch log: {error}"
-
-
-def _stop_process(process: subprocess.Popen[str]) -> None:
-    if process.poll() is not None:
-        return
-    try:
-        os.killpg(process.pid, signal.SIGINT)
-    except ProcessLookupError:
-        return
-    try:
-        process.wait(timeout=15.0)
-    except subprocess.TimeoutExpired:
-        try:
-            os.killpg(process.pid, signal.SIGTERM)
-            process.wait(timeout=10.0)
-        except (ProcessLookupError, subprocess.TimeoutExpired):
-            pass
-
-
-def run_mode(
-    mode: dict[str, str], args: argparse.Namespace, node: ControlSamples, batch_dir: Path
-) -> dict[str, Any]:
-    log_path = batch_dir / f"{mode['name']}.launch.log"
-    environment = os.environ.copy()
-    environment.setdefault("RCUTILS_COLORIZED_OUTPUT", "0")
-    command = _launch_command(
-        mode, args.api_port, args.physics_hz, args.controller_use_sim_time
-    )
-    started = time.monotonic()
-    with log_path.open("w", encoding="utf-8") as log_file:
-        process = subprocess.Popen(
-            command,
-            stdout=log_file,
-            stderr=subprocess.STDOUT,
-            env=environment,
-            start_new_session=True,
-            text=True,
-        )
-        ready_deadline = started + args.startup_timeout
-        while time.monotonic() < ready_deadline and process.poll() is None:
-            rclpy.spin_once(node, timeout_sec=0.1)
-            if (
-                node.clock_time is not None
-                and node.latest_joint is not None
-                and node.latest_odom is not None
-            ):
-                break
-        ready = node.clock_time is not None and node.latest_joint is not None and node.latest_odom is not None
-        result: dict[str, Any] = {
-            "mode": mode["name"],
-            "headless": mode["headless"] == "true",
-            "rviz_requested": mode["rviz"] == "true",
-            "controller_use_sim_time": args.controller_use_sim_time,
-            "qt_qpa_platform": mode["qt"],
-            "command": command,
-            "launch_log": str(log_path),
-            "startup_seconds": time.monotonic() - started,
-            "ready": ready,
-            "launch_returncode_before_stop": process.poll(),
-        }
-        if ready:
-            for _ in range(max(1, int(args.warmup_seconds * 10))):
-                rclpy.spin_once(node, timeout_sec=0.1)
-            node.reset_measurement()
-            measurement_start = time.monotonic()
-            end = measurement_start + args.duration
-            max_wheel_speed = 0.0
-            command_end = measurement_start + args.command_seconds
-            while time.monotonic() < end and process.poll() is None:
-                now = time.monotonic()
-                node.publish_cmd(args.command_speed if now < command_end else 0.0)
-                rclpy.spin_once(node, timeout_sec=0.05)
-                max_wheel_speed = max(max_wheel_speed, node.wheel_speed())
-            node.publish_cmd(0.0)
-            for _ in range(10):
-                rclpy.spin_once(node, timeout_sec=0.05)
-            rviz_state = _rviz_state(process, log_path)
-            control_ok = max_wheel_speed > 0.01 and node.displacement() > 0.001
-            rviz_ok = not result["rviz_requested"] or rviz_state["survived"]
-            topic_metrics = {
-                name: samples.stats(physics_dt=1.0 / args.physics_hz)
-                for name, samples in node.samples.items()
-            }
-            timing_valid = all(
-                topic_metrics[name]["measurement_valid"]
-                for name in ("clock", "sim_joint_states", "joint_states", "odom")
-            )
-            if not timing_valid:
-                status = "NOT_VALID_TIME_RESET"
-            elif not control_ok:
-                status = "FAIL_CONTROL_RESPONSE"
-            elif not rviz_ok:
-                status = "FAIL_RVIZ"
-            else:
-                status = "PASS"
-            result.update(
-                {
-                    "status": status,
-                    "duration_seconds": time.monotonic() - measurement_start,
-                    "measurement": {
-                        "wall_start_monotonic": measurement_start,
-                        "wall_end_monotonic": time.monotonic(),
-                        "configured_physics_hz": args.physics_hz,
-                        "configured_physics_dt_s": 1.0 / args.physics_hz,
-                        "timing_valid": timing_valid,
-                    },
-                    "control": {
-                        "max_wheel_speed_rad_s": max_wheel_speed,
-                        "odom_displacement_m": node.displacement(),
-                        "response_ok": max_wheel_speed > 0.01 and node.displacement() > 0.001,
-                    },
-                    "topics": topic_metrics,
-                    "rviz_seen": rviz_state["survived"],
-                    "rviz": rviz_state,
-                }
-            )
-        else:
-            result["status"] = "NOT_RUN"
-            result["failure"] = "launch exited or required control topics did not become ready"
-        result["resource"] = _resource_snapshot(process)
-        result["launch_returncode"] = process.poll()
-        result["log_tail"] = _tail(log_path)
-        _stop_process(process)
-    return result
 
 
 def _conclusion_for_status(status: str) -> str:
@@ -561,9 +403,7 @@ def main() -> int:
                     results.append(
                         {
                             "mode": mode["name"],
-                            "headless": mode["headless"] == "true",
-                            "rviz_requested": mode["rviz"] == "true",
-                            "status": "TEST_ERROR",
+                            "headless": mode["headless"] == "true",                            "status": "TEST_ERROR",
                             "ready": False,
                             "failure": f"performance test utility failed: {error}",
                         }
