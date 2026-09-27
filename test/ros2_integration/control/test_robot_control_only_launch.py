@@ -13,12 +13,19 @@ START_SCRIPT = BRINGUP / "scripts" / "start_robot_control_sim.py"
 
 
 class RobotControlLaunchTest(unittest.TestCase):
-    def test_full_launch_exposes_all_sensor_profiles(self) -> None:
+    def test_core_launch_is_sensor_free_and_has_runtime_sensor_lifecycle(self) -> None:
         text = SIM_LAUNCH.read_text(encoding="utf-8")
+        start_text = START_SCRIPT.read_text(encoding="utf-8")
 
-        self.assertIn('default_value="full"', text)
-        self.assertIn('choices=["none", "minimal", "lidar", "full"]', text)
-        self.assertIn('profile_map = {"none": "none", "minimal": "rgb_depth", "lidar": "lidar", "full": "data"}', text)
+        self.assertIn('default_value="none"', text)
+        self.assertIn('choices=["none"]', text)
+        self.assertNotIn('executable="camera_contract_publisher.py"', text)
+        self.assertNotIn('executable="isaacsim_compat_bridge.py"', text)
+        self.assertIn('"enable_sensors": False', text)
+        self.assertIn('RobotSensorRuntime(', start_text)
+        self.assertIn('_RUNTIME_SENSOR_MANAGER.mark_ready(error=sensor_catalog_error)', start_text)
+        self.assertNotIn('create_robot_sensor_suite(', start_text)
+        self.assertNotIn('bootstrap_camera_gates(', start_text)
         self.assertIn('lidar_profile = "MID360_PERFORMANCE"', text)
         self.assertIn('default_value="parented"', text)
 
@@ -27,12 +34,8 @@ class RobotControlLaunchTest(unittest.TestCase):
 
         self.assertNotIn('package="rviz2"', text)
         self.assertIn('executable="vla_contract_bridge.py"', text)
-        self.assertIn('executable="camera_contract_publisher.py"', text)
-        self.assertIn('executable="isaacsim_compat_bridge.py"', text)
-        self.assertIn('"livox_lidar_mode": "custom"', text)
-        self.assertIn('default_value="15000"', text)
-        self.assertIn('"livox_max_points": ParameterValue(', text)
-        self.assertIn('"pointcloud_topics": ["/livox/lidar_points"]', text)
+        self.assertNotIn('executable="camera_contract_publisher.py"', text)
+        self.assertNotIn('executable="isaacsim_compat_bridge.py"', text)
         self.assertTrue((BRINGUP / "launch" / "rviz_only.launch.py").is_file())
 
     def test_isaac_startup_enables_multitick_motion_bvh(self) -> None:

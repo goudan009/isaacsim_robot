@@ -158,12 +158,14 @@ def _create_direct_helper_lidar_graph(
     keys = og.Controller.Keys
     create_nodes = [
         ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
+        ("LidarEnableGate", "isaacsim.core.nodes.IsaacSimulationGate"),
         ("ROS2Context", "isaacsim.ros2.bridge.ROS2Context"),
         ("PointCloudConfig", "isaacsim.ros2.bridge.ROS2RtxLidarPointCloudConfig"),
         ("PointCloudPublish", "isaacsim.ros2.bridge.ROS2RtxLidarHelper"),
     ]
     connections = [
-        ("OnPlaybackTick.outputs:tick", "PointCloudPublish.inputs:execIn"),
+        ("OnPlaybackTick.outputs:tick", "LidarEnableGate.inputs:execIn"),
+        ("LidarEnableGate.outputs:execOut", "PointCloudPublish.inputs:execIn"),
         ("ROS2Context.outputs:context", "PointCloudPublish.inputs:context"),
         (
             "PointCloudConfig.outputs:selectedMetadata",
@@ -171,6 +173,7 @@ def _create_direct_helper_lidar_graph(
         ),
     ]
     set_values = [
+        ("LidarEnableGate.inputs:step", 0),
         ("PointCloudPublish.inputs:renderProductPath", render_product_path),
         ("PointCloudPublish.inputs:topicName", topic),
         ("PointCloudPublish.inputs:frameId", frame_id),
@@ -233,6 +236,7 @@ def _create_graph_owned_lidar_graph(
         ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
         ("SimulationFrame", "isaacsim.core.nodes.OgnIsaacRunOneSimulationFrame"),
         ("RenderProduct", "isaacsim.core.nodes.IsaacCreateRenderProduct"),
+        ("LidarEnableGate", "isaacsim.core.nodes.IsaacSimulationGate"),
         ("ROS2Context", "isaacsim.ros2.bridge.ROS2Context"),
         ("PointCloudConfig", "isaacsim.ros2.bridge.ROS2RtxLidarPointCloudConfig"),
         ("PointCloudPublish", "isaacsim.ros2.bridge.ROS2RtxLidarHelper"),
@@ -240,7 +244,8 @@ def _create_graph_owned_lidar_graph(
     connections = [
         ("OnPlaybackTick.outputs:tick", "SimulationFrame.inputs:execIn"),
         ("SimulationFrame.outputs:step", "RenderProduct.inputs:execIn"),
-        ("RenderProduct.outputs:execOut", "PointCloudPublish.inputs:execIn"),
+        ("RenderProduct.outputs:execOut", "LidarEnableGate.inputs:execIn"),
+        ("LidarEnableGate.outputs:execOut", "PointCloudPublish.inputs:execIn"),
         ("RenderProduct.outputs:renderProductPath", "PointCloudPublish.inputs:renderProductPath"),
         ("ROS2Context.outputs:context", "PointCloudPublish.inputs:context"),
         (
@@ -249,6 +254,7 @@ def _create_graph_owned_lidar_graph(
         ),
     ]
     set_values = [
+        ("LidarEnableGate.inputs:step", 0),
         ("RenderProduct.inputs:cameraPrim", camera_prim),
         ("RenderProduct.inputs:enabled", True),
         ("PointCloudPublish.inputs:topicName", topic),
@@ -312,11 +318,13 @@ def create_physics_imu_graph(stage: object, parent_path: str, frame_id: str, top
         {
             keys.CREATE_NODES: [
                 ("OnPhysicsStep", "isaacsim.core.nodes.OnPhysicsStep"),
+                ("IMUEnableGate", "isaacsim.core.nodes.IsaacSimulationGate"),
                 ("ReadIMU", "isaacsim.sensors.physics.IsaacReadIMU"),
                 ("PublishIMU", "isaacsim.ros2.bridge.ROS2PublishImu"),
             ],
             keys.CONNECT: [
-                ("OnPhysicsStep.outputs:step", "ReadIMU.inputs:execIn"),
+                ("OnPhysicsStep.outputs:step", "IMUEnableGate.inputs:execIn"),
+                ("IMUEnableGate.outputs:execOut", "ReadIMU.inputs:execIn"),
                 ("ReadIMU.outputs:execOut", "PublishIMU.inputs:execIn"),
                 ("ReadIMU.outputs:linAcc", "PublishIMU.inputs:linearAcceleration"),
                 ("ReadIMU.outputs:angVel", "PublishIMU.inputs:angularVelocity"),
@@ -324,6 +332,7 @@ def create_physics_imu_graph(stage: object, parent_path: str, frame_id: str, top
                 ("ReadIMU.outputs:sensorTime", "PublishIMU.inputs:timeStamp"),
             ],
             keys.SET_VALUES: [
+                ("IMUEnableGate.inputs:step", 0),
                 ("ReadIMU.inputs:imuPrim", [imu_prim]),
                 ("ReadIMU.inputs:readGravity", True),
                 ("PublishIMU.inputs:topicName", topic),
@@ -722,6 +731,7 @@ def create_robot_mid360(
     mount_mode: str = "parented",
     object_id_map: bool = True,
     tick_rate_hz: float = 10.0,
+    resource_sink: dict[str, object] | None = None,
 ) -> str:
     """Create a robot MID360 using the historical ROS helper chain.
 
@@ -771,13 +781,27 @@ def create_robot_mid360(
         transform_op = root.AddTransformOp(UsdGeom.XformOp.PrecisionDouble)
         transform_op.Set(_copy_rigid_world_transform(stage, parent_path))
         _KINEMATIC_SENSOR_ROOTS.append(root)
+    if resource_sink is not None:
+        resource_sink.update({
+            "stage": stage,
+            "root_path": root_path,
+            "graph_path": graph_path,
+        })
     lidar_path = f"{root_path}/Lidar"
     lidar = _create_lidar(stage, lidar_path, tick_rate_hz=tick_rate_hz)
     lidar_path = str(lidar.paths[0])
+    if resource_sink is not None:
+        resource_sink.update({"lidar": lidar, "lidar_path": lidar_path})
     _configure_profile(stage, lidar_path, requested_profile)
 
     if transport == "native":
         render_product_path, sensor = _create_lidar_render_product(lidar, frame_id)
+        if resource_sink is not None:
+            resource_sink.update({
+                "lidar_sensor": sensor,
+                "render_product": getattr(sensor, "render_product", None),
+                "render_product_path": render_product_path,
+            })
         if sensor is None:
             raise RuntimeError("native MID360 transport requires the Isaac Sim LidarSensor API")
         _attach_native_pointcloud_writer(
@@ -791,6 +815,12 @@ def create_robot_mid360(
         return lidar_path
 
     render_product_path, sensor = _create_lidar_render_product(lidar, frame_id)
+    if resource_sink is not None:
+        resource_sink.update({
+            "lidar_sensor": sensor,
+            "render_product": getattr(sensor, "render_product", None),
+            "render_product_path": render_product_path,
+        })
     if sensor is None:
         raise RuntimeError("historical MID360 helper transport requires the Isaac Sim LidarSensor API")
     _create_direct_helper_lidar_graph(

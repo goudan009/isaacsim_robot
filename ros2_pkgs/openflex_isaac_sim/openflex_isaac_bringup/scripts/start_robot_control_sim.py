@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Run the generic Isaac REST loop with a robot-control spawn hook.
 
-The upstream REST server's default spawn operation always configures sensors.
-This small adapter replaces only that operation with URDF import, the existing
-topic-based robot controller, and the simulation clock graph. The default is
-sensor-free; an explicit four-camera performance probe is the sole exception.
+The upstream REST server's default spawn operation is replaced with URDF
+import, the existing topic-based robot controller, and the simulation clock
+graph. Sensors are exposed as factories and created or destroyed on demand
+through the Kit-thread lifecycle API after robot control is ready.
 """
 
 from __future__ import annotations
@@ -13,6 +13,12 @@ import runpy
 import os
 import sys
 from pathlib import Path
+
+
+_RUNTIME_SENSOR_MANAGER = None
+_RUNTIME_SENSOR_SERVER = None
+_RUNTIME_SENSOR_UPDATE_SUBSCRIPTION = None
+_RUNTIME_SENSOR_RUNTIME = None
 
 
 def _isaac_install_root() -> Path | None:
@@ -216,13 +222,7 @@ def _ensure_clock_graph() -> None:
 
 
 def _installed_sensor_share() -> Path:
-    """Resolve the installed RealSense config inside Isaac's Python process.
-
-    The upstream REST ``SpawnRobotRequest`` preserves ``enable_sensors`` but
-    discards extension fields.  The explicit camera probe therefore resolves
-    its fixed repository component from the colcon environment rather than
-    relying on custom HTTP request fields.
-    """
+    """Resolve the installed sensor config for the runtime sensor factories."""
 
     for prefix in os.environ.get("AMENT_PREFIX_PATH", "").split(os.pathsep):
         if prefix:
@@ -380,33 +380,17 @@ def _install_control_only_spawn(rest_api_module) -> None:
                 flush=True,
             )
             prim_path = "/openflex"
-        camera_data: dict[str, object] = {"disabled": True, "created": []}
-        sensor_profile = os.environ.get("OPENFLEX_ROBOT_SENSOR_PROFILE", "rgb_depth").strip().lower()
+        sensor_catalog_error = ""
         lidar_profile = os.environ.get("OPENFLEX_MID360_LIDAR_PROFILE", "MID360_PERFORMANCE").strip()
         lidar_transport = os.environ.get("OPENFLEX_MID360_LIDAR_TRANSPORT", "helper").strip().lower()
-        lidar_mount_mode = os.environ.get(
-            "OPENFLEX_MID360_MOUNT_MODE", "parented"
-        ).strip().lower()
         lidar_object_id_map = os.environ.get(
             "OPENFLEX_MID360_OBJECT_ID_MAP", "false"
         ).strip().lower() in ("1", "true", "yes", "on")
-        # The legacy REST request model drops extension fields such as
-        # ``enable_sensors``. The launch process already carries the
-        # authoritative profile in its environment, so do not let that
-        # discarded request field silently disable a requested full stack.
-        sensors_requested = sensor_profile != "none" or bool(params.get("enable_sensors", False))
 
-        # =================================================================
-        # Isaac Sim 6.0 ArticulationState tensor view 初始化修复
-        # =================================================================
-        # 根因：首次传感器渲染会触发 MetricAssembler/PhysX 对碰撞 prim
-        # 做一次延迟重组。如果此时控制图已经创建，ArticulationState 的
-        # tensor view 会被永久失效。
-        # 修复：
-        #   1. 在没有控制图的情况下创建并预热传感器
-        #   2. 停止 timeline，等待首次 prim 重组完成
-        #   3. 创建 ActionGraph，再次 play 初始化稳定的 tensor view
-        # =================================================================
+        # First stabilize physics without authoring sensor prims. The old
+        # startup path pre-created every camera and the lidar before the
+        # control graph, which made the sensor page a ROS-output gate rather
+        # than a real lifecycle manager.
         import omni.timeline
         import omni.kit.app
 
@@ -420,61 +404,18 @@ def _install_control_only_spawn(rest_api_module) -> None:
             for _ in range(3):
                 app.update()
 
-        # 步骤 1：创建传感器，但暂不创建控制图。
-        camera_records_for_bootstrap = []
-        if sensors_requested and sensor_profile != "none":
-            from openflex_isaac_sensors.integration import create_robot_sensor_suite
-
-            stage = omni.usd.get_context().get_stage()
-            camera_enabled = sensor_profile in {"rgb", "rgb_depth", "data", "teleop"}
-            lidar_enabled = sensor_profile in {"lidar", "data"}
-            realsense_root = _installed_sensor_share() if camera_enabled else None
-            mid360_root = _sensor_asset_root() if lidar_enabled else None
-            camera_data = create_robot_sensor_suite(
-                stage,
-                "/openflex",
-                sensor_asset_dir=mid360_root or realsense_root,
-                realsense_asset_dir=realsense_root,
-                mid360_asset_dir=mid360_root,
-                sensor_profile=sensor_profile,
-                lidar_profile=lidar_profile,
-                lidar_transport=lidar_transport,
-                lidar_mount_mode=lidar_mount_mode,
-                lidar_object_id_map=lidar_object_id_map,
-                bootstrap_cameras=False,
-            )
-            camera_records_for_bootstrap = camera_data.get("camera_records", [])
-            print(
-                "[robot-control-only] sensor suite ready: "
-                f"profile={sensor_profile} cameras={camera_data.get('camera_count', 0)} "
-                f"lidar={camera_data.get('lidar_prim_path', '')} "
-                f"transport={camera_data.get('lidar_transport', 'none')} "
-                f"mount_mode={camera_data.get('lidar_mount_mode', 'none')}",
-                flush=True,
-            )
-
         stage = omni.usd.get_context().get_stage()
         install_prim_resync_watch(stage)
 
-        # 步骤 2：首次 play 完成碰撞 cooking、MetricAssembler 重组和
-        # SyntheticData gate 创建。Isaac Sim 6 会在每次 stop/play 后重新
-        # 组装 metric layers；如果此时已经创建 articulation tensor view，
-        # 重组会替换碰撞 shape 并使整个 view 失效。因此控制图必须挂载到
-        # 这个持续播放、已经稳定的 physics session，不能再 stop/play。
-        print("[robot-control-only] prewarming physics and sensor rendering", flush=True)
+        # The first play settles collision cooking before articulation tensor
+        # views are created. Runtime sensor initialization happens after this
+        # stable control session exists; each sensor factory owns its cleanup.
+        print("[robot-control-only] prewarming sensor-free physics", flush=True)
         timeline.play()
         for _ in range(24):
             app.update()
-
-        if camera_records_for_bootstrap:
-            from openflex_isaac_sensors.integration import bootstrap_camera_gates
-
-            bootstrap_camera_gates(camera_records_for_bootstrap)
-            for _ in range(8):
-                app.update()
-
         print(
-            "[robot-control-only] physics and sensor prewarm complete; "
+            "[robot-control-only] physics prewarm complete; "
             "keeping timeline active",
             flush=True,
         )
@@ -491,13 +432,44 @@ def _install_control_only_spawn(rest_api_module) -> None:
             app.update()
         print("[robot-control-only] control graph initialized on active timeline", flush=True)
 
+        if _RUNTIME_SENSOR_MANAGER is None:
+            raise RuntimeError("runtime sensor control API was not initialized")
+        if not _RUNTIME_SENSOR_MANAGER.snapshot()["ready"]:
+            global _RUNTIME_SENSOR_RUNTIME
+            try:
+                from openflex_isaac_sensors.runtime_sensors import RobotSensorRuntime
+
+                _RUNTIME_SENSOR_RUNTIME = RobotSensorRuntime(
+                    stage_getter=lambda: omni.usd.get_context().get_stage(),
+                    robot_prim_path="/openflex",
+                    realsense_asset_dir=_installed_sensor_share(),
+                    mid360_asset_dir=_sensor_asset_root(),
+                    lidar_profile=lidar_profile,
+                    lidar_transport=lidar_transport,
+                    lidar_object_id_map=lidar_object_id_map,
+                )
+                _RUNTIME_SENSOR_RUNTIME.register(_RUNTIME_SENSOR_MANAGER)
+            except Exception as error:
+                sensor_catalog_error = f"传感器配置加载失败：{type(error).__name__}: {error}"
+                print(f"[robot-control-only] {sensor_catalog_error}", flush=True)
+            _RUNTIME_SENSOR_MANAGER.mark_ready(error=sensor_catalog_error)
+        sensor_snapshot = _RUNTIME_SENSOR_MANAGER.snapshot()
+        sensor_catalog_error = sensor_snapshot["error"]
+        sensor_catalog = sensor_snapshot["sensors"]
+        print(
+            "[robot-control-only] runtime sensor lifecycle ready: "
+            + (", ".join(sorted(sensor_catalog)) if sensor_catalog else "no sensors")
+            + (f"; error={sensor_catalog_error}" if sensor_catalog_error else ""),
+            flush=True,
+        )
+
         _set_robot_viewport()
 
         print("[robot-control-only] ensuring ROS clock graph", flush=True)
         _ensure_clock_graph()
         return {
             "success": True,
-            "data": {"prim_path": prim_path, "sensors": camera_data},
+            "data": {"prim_path": prim_path, "sensors": sensor_catalog},
         }
 
     api_class = rest_api_module.IsaacSimRestApi
@@ -509,7 +481,43 @@ def _install_control_only_spawn(rest_api_module) -> None:
     create_server = rest_api_module.create_server
 
     def create_server_with_clock(*args, **kwargs):
+        global _RUNTIME_SENSOR_MANAGER
+        global _RUNTIME_SENSOR_SERVER
+        global _RUNTIME_SENSOR_UPDATE_SUBSCRIPTION
+
         server = create_server(*args, **kwargs)
+        if _RUNTIME_SENSOR_MANAGER is None:
+            from openflex_isaac_sensors.runtime_control import (
+                RuntimeSensorControlServer,
+                RuntimeSensorManager,
+            )
+            import omni.kit.app
+
+            _RUNTIME_SENSOR_MANAGER = RuntimeSensorManager()
+            app = omni.kit.app.get_app()
+
+            def process_sensor_requests(_event):
+                _RUNTIME_SENSOR_MANAGER.bind_application_thread()
+                _RUNTIME_SENSOR_MANAGER.process_pending()
+
+            _RUNTIME_SENSOR_UPDATE_SUBSCRIPTION = (
+                app.get_update_event_stream().create_subscription_to_pop(
+                    process_sensor_requests,
+                    name="openflex_runtime_sensor_control",
+                )
+            )
+            sensor_port = int(os.environ.get("OPENFLEX_SENSOR_CONTROL_PORT", "8086"))
+            _RUNTIME_SENSOR_SERVER = RuntimeSensorControlServer(
+                _RUNTIME_SENSOR_MANAGER,
+                host="127.0.0.1",
+                port=sensor_port,
+            )
+            _RUNTIME_SENSOR_SERVER.start()
+            print(
+                f"[robot-control-only] loopback sensor control API ready at "
+                f"{_RUNTIME_SENSOR_SERVER.base_url}",
+                flush=True,
+            )
         _ensure_clock_graph()
         if os.environ.get("OPENFLEX_EMPTY_SCENE", "").strip().lower() in {"1", "true", "yes", "on"}:
             import omni.timeline

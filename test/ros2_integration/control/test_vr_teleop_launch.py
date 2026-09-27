@@ -43,12 +43,23 @@ class VrTeleopLaunchTest(unittest.TestCase):
     def test_launch_uses_isaac_urdf_and_conservative_chassis_defaults(self) -> None:
         script = LAUNCH_FILE.read_text(encoding="utf-8")
 
-        self.assertIn('"openflex_isaac_robot.urdf"', script)
+        self.assertIn('"ISAACSIM_ROBOT_GENERATED_DIR"', script)
+        self.assertIn('"robot_control_only.urdf"', script)
+        self.assertIn('LaunchConfiguration("isaac_urdf")', script)
+        self.assertNotIn('"openflex_isaac_robot.urdf"', script)
         self.assertIn('DeclareLaunchArgument("max_linear_speed", default_value="0.35")', script)
         self.assertIn('DeclareLaunchArgument("boost_linear_speed", default_value="0.50")', script)
         self.assertIn('DeclareLaunchArgument("max_angular_speed", default_value="0.60")', script)
         self.assertIn('DeclareLaunchArgument("acceleration_time", default_value="2.0")', script)
         self.assertIn('DeclareLaunchArgument("listen_port", default_value="5100")', script)
+
+    def test_launch_checks_generated_urdf_before_stopping_existing_vr_nodes(self) -> None:
+        script = LAUNCH_FILE.read_text(encoding="utf-8")
+        start = script[script.index("def _start_vr_stack"):script.index("def generate_launch_description")]
+
+        self.assertIn("os.path.isfile(urdf_path)", start)
+        self.assertIn("start the simulation first", start.lower())
+        self.assertLess(start.index("os.path.isfile(urdf_path)"), start.index("stop_existing_vr"))
 
     def test_launch_stops_existing_vr_stack_before_creating_nodes(self) -> None:
         script = LAUNCH_FILE.read_text(encoding="utf-8")

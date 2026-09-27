@@ -1,7 +1,8 @@
 # OpenFleX Isaac Sim ROS 2 Bringup
 
-This package launches the OpenFleX robot, ros2_control, four RGB-D cameras,
-the Livox MID360 point cloud, and the Livox IMU in Isaac Sim. The main
+This package launches the OpenFleX robot and ros2_control in Isaac Sim. RGB-D
+cameras, the Livox MID360 point cloud, and IMU are separate runtime resources
+that the GUI can create and destroy while the robot core is running. The main
 simulation launch never starts RViz; RViz is a separate launch entry.
 
 The documented and validated path is **Isaac Sim 6.0** with ROS 2 Humble.
@@ -29,15 +30,15 @@ colcon build --symlink-install \
 source install/setup.bash
 ```
 
-## Isaac Sim 6.0 full-chain launch
+## Isaac Sim 6.0 robot-core launch
 
-The following is the known-good interactive command used for the full-chain
-validation. `sensor_profile:=full` enables all four RGB-D cameras, MID360,
-and IMU. `lidar_transport:=helper` is the recommended stable MID360 path for
-Isaac Sim 6.0.
+The robot core starts without sensor prims. The Sensors page then creates and
+destroys actual camera/lidar/IMU stage resources, render products, and ROS 2
+graphs on Isaac Kit's update thread. `lidar_transport:=helper` is the
+recommended stable MID360 path for Isaac Sim 6.0.
 
 With no launch arguments, `sim.launch.py` defaults to `headless:=true`,
-`render_hz:=30.0`, `physics_hz:=120.0`, `sensor_profile:=full`,
+`render_hz:=30.0`, `physics_hz:=120.0`, `sensor_profile:=none`,
 `lidar_transport:=helper`, `lidar_object_id_map:=false`, and
 `start_upper_body:=true`, `show_lift_mast:=true`, and `ros_domain_id:=49`.
 It does not start RViz.
@@ -59,7 +60,7 @@ ros2 launch openflex_isaac_bringup sim.launch.py \
   headless:=false \
   render_hz:=30 \
   physics_hz:=120 \
-  sensor_profile:=full \
+  sensor_profile:=none \
   lidar_transport:=helper \
   lidar_object_id_map:=false \
   start_upper_body:=true \
@@ -86,9 +87,9 @@ Launch parameters and defaults:
 - `headless`: defaults to `true`; use `false` for the Isaac Sim GUI.
 - `render_hz`: defaults to `30.0`.
 - `physics_hz`: defaults to `120.0`.
-- `sensor_profile`: defaults to `full`; choices are `none`, `minimal`, `lidar`, and `full`.
+- `sensor_profile`: compatibility argument fixed to `none`; launch rejects profiles that imply startup-time sensor creation.
 - `lidar_transport`: defaults to `helper`, the stable Isaac Sim 6.0 MID360 path.
-- `lidar_mount_mode`: defaults to `parented`, which keeps the MID360 below the robot USD mount so it follows base motion. `fixed_kinematic` and `fixed` are diagnostic modes.
+- `lidar_mount_mode`: fixed to `parented`, so a runtime-created MID360 follows the robot mount.
 - `lidar_object_id_map`: defaults to `false` for the current MID360 transport.
 - `start_upper_body`: defaults to `true` and loads arm, head, and lift controllers.
 - `show_head_camera`: defaults to `true`; set it to `false` only while debugging the physical head-camera mesh.
@@ -97,6 +98,9 @@ Launch parameters and defaults:
 - `isaac_path`: auto-detects Isaac Sim and currently resolves to `/home/1024201092WYH/isaacsim-6.0`.
 - `api_host` and `api_port`: default to `127.0.0.1` and `8085`. Launch fails fast
   when the port is already occupied, preventing a new launch from attaching to a stale Isaac process.
+- `sensor_control_port`: defaults to loopback port `8086`; used by the GUI to
+  query sensor state and request resource creation/destruction. Launch fails
+  if this port is occupied.
 - `stage`: defaults to `auto` and uses the package's empty validation stage.
 - `use_sim_time`: defaults to `true`; `controller_use_sim_time` defaults to `false`.
 - `spawn_wait_timeout` and `sim_ready_timeout`: default to `900.0` and `180.0` seconds.
@@ -104,24 +108,38 @@ Launch parameters and defaults:
 - `roll/pitch/yaw`: default to `0.0/0.0/0.0` radians.
 - `fixed`: defaults to `false`.
 
-## Launch profiles
+## Runtime sensor lifecycle
 
-`sim.launch.py` supports these sensor profiles:
+The control-center workflow is intentionally split into two stages:
 
-- `none`: robot control only.
-- `minimal`: four RGB-D cameras.
-- `lidar`: MID360 point cloud and IMU.
-- `full`: four RGB-D cameras, MID360 point cloud, and IMU.
+1. Start the simulation core and wait for robot/control readiness.
+2. On the Sensors page, create each desired camera, MID360, or IMU. Cameras
+   expose RGB/depth/CameraInfo topics. The GUI can preview RGB locally when
+   Isaac Sim is running on the same host. Remote launches keep
+   `ROS_LOCALHOST_ONLY=1`, so desktop preview is intentionally disabled unless
+   an explicitly secured DDS forwarding setup is added.
+3. Destroy a sensor when it is no longer needed. Stopping Isaac Sim tears down
+   all remaining Kit resources with the process.
 
-Useful options include:
+The loopback-only HTTP API is implemented in `openflex_isaac_sensors` and
+accepts `GET /v1/sensors` plus `POST /v1/sensors/{id}` with
+`{"action":"create"}` or `{"action":"destroy"}`. Requests are queued from
+the HTTP worker and all USD/OmniGraph/RTX changes run on the Kit update thread.
+Sensor states are `inactive`, `creating`, `active`, `destroying`, and `error`;
+creation is not reported as active until its render/publisher resources have
+had time to initialize. The API binds only to `127.0.0.1`; remote GUI requests
+run through SSH, so the control port is not exposed to the network.
+
+Data collection and the current simulation inference preflight require all
+four camera resources to be `active`. MID360 and IMU are optional to those
+tasks. Do not create or destroy sensors while a recording or inference task is
+running; the GUI disables lifecycle buttons during those operations.
+
+## Launch examples
 
 ```bash
-# Control-only smoke test
+# Start the core (sensors are created later in the GUI)
 ros2 launch openflex_isaac_bringup sim.launch.py sensor_profile:=none
-
-# Full sensors
-ros2 launch openflex_isaac_bringup sim.launch.py \
-  sensor_profile:=full
 
 # Use another Isaac Sim installation
 ros2 launch openflex_isaac_bringup sim.launch.py \

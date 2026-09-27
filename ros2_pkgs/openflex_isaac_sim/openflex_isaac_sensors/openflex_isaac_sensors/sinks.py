@@ -100,6 +100,7 @@ class IsaacSimRos2Bridge:
         self._graph_camera_specs: dict[str, tuple[str, tuple[int, int]]] = {}
         self._gate_config: dict[str, dict[str, Any]] = {}
         self._qos_config: dict[str, Any] = {}
+        self._runtime_camera_gates: dict[str, tuple[str, ...]] = {}
 
     @staticmethod
     def _node_prefix(value: str) -> str:
@@ -216,6 +217,12 @@ class IsaacSimRos2Bridge:
                 )
                 if enabled
             )
+            runtime_gate_nodes: dict[str, str] = {}
+            for node in tuple(sensor_nodes) + info_nodes:
+                gate_node = f"{node}_RuntimeEnableGate"
+                runtime_gate_nodes[node] = gate_node
+                create_nodes.append((gate_node, "isaacsim.core.nodes.IsaacSimulationGate"))
+                set_values.append((f"{gate_node}.inputs:step", 0))
             if exec_gate_step > 0 and not graph_owned:
                 for sensor_node in tuple(sensor_nodes) + info_nodes:
                     gate_node = f"{sensor_node}_ExecGate"
@@ -231,8 +238,10 @@ class IsaacSimRos2Bridge:
                 ])
                 render_nodes = tuple(sensor_nodes) + info_nodes
                 for node in render_nodes:
+                    gate_node = runtime_gate_nodes[node]
                     connections.extend([
-                        (f"{render_node}.outputs:execOut", f"{node}.inputs:execIn"),
+                        (f"{render_node}.outputs:execOut", f"{gate_node}.inputs:execIn"),
+                        (f"{gate_node}.outputs:execOut", f"{node}.inputs:execIn"),
                         (f"{render_node}.outputs:renderProductPath", f"{node}.inputs:renderProductPath"),
                     ])
             else:
@@ -268,7 +277,11 @@ class IsaacSimRos2Bridge:
                 if not graph_owned:
                     source = exec_gate_nodes.get(node, tick_node)
                     output = f"{source}.outputs:execOut" if source != tick_node else f"{source}.outputs:tick"
-                    connections.append((output, f"{node}.inputs:execIn"))
+                    gate_node = runtime_gate_nodes[node]
+                    connections.extend([
+                        (output, f"{gate_node}.inputs:execIn"),
+                        (f"{gate_node}.outputs:execOut", f"{node}.inputs:execIn"),
+                    ])
             if publish_camera_info:
                 set_values.extend([
                     (f"{info_node}.inputs:frameId", rgb_frame_id),
@@ -282,7 +295,11 @@ class IsaacSimRos2Bridge:
                 if not graph_owned:
                     source = exec_gate_nodes.get(info_node, tick_node)
                     output = f"{source}.outputs:execOut" if source != tick_node else f"{source}.outputs:tick"
-                    connections.append((output, f"{info_node}.inputs:execIn"))
+                    gate_node = runtime_gate_nodes[info_node]
+                    connections.extend([
+                        (output, f"{gate_node}.inputs:execIn"),
+                        (f"{gate_node}.outputs:execOut", f"{info_node}.inputs:execIn"),
+                    ])
             if publish_depth_camera_info:
                 set_values.extend([
                     (f"{depth_info_node}.inputs:frameId", depth_frame_id),
@@ -296,9 +313,18 @@ class IsaacSimRos2Bridge:
                 if not graph_owned:
                     source = exec_gate_nodes.get(depth_info_node, tick_node)
                     output = f"{source}.outputs:execOut" if source != tick_node else f"{source}.outputs:tick"
-                    connections.append((output, f"{depth_info_node}.inputs:execIn"))
+                    gate_node = runtime_gate_nodes[depth_info_node]
+                    connections.extend([
+                        (output, f"{gate_node}.inputs:execIn"),
+                        (f"{gate_node}.outputs:execOut", f"{depth_info_node}.inputs:execIn"),
+                    ])
+            camera_key = str(camera.get("camera_key", index))
+            self._runtime_camera_gates[camera_key] = tuple(
+                f"{self.graph_path}/{gate_node}.inputs:step"
+                for gate_node in runtime_gate_nodes.values()
+            )
             if graph_owned:
-                self._graph_render_nodes[str(camera.get("camera_key", index))] = render_node
+                self._graph_render_nodes[camera_key] = render_node
                 self._graph_camera_specs[str(camera.get("camera_key", index))] = (
                     camera_prim_path,
                     (int(camera.get("width", 640)), int(camera.get("height", 480))),
@@ -323,6 +349,36 @@ class IsaacSimRos2Bridge:
             "queue_sizes": queue_sizes,
         }
         return graph
+
+    def set_camera_enabled(self, camera_key: str, enabled: bool) -> None:
+        """Gate every ROS 2 stream belonging to a camera on/off."""
+        gate_paths = self._runtime_camera_gates.get(str(camera_key))
+        if not gate_paths:
+            raise KeyError(f"no runtime camera gates for {camera_key!r}")
+        import omni.graph.core as og
+
+        step = 1 if enabled else 0
+        for path in gate_paths:
+            og.Controller.attribute(path).set(step)
+
+    def destroy(self, stage: object | None = None) -> None:
+        """Remove this camera's isolated publisher graph from the active stage."""
+        if stage is None:
+            import omni.usd
+
+            stage = omni.usd.get_context().get_stage()
+        import pxr.Sdf
+
+        prim = stage.GetPrimAtPath(self.graph_path)
+        if prim and prim.IsValid():
+            stage.RemovePrim(pxr.Sdf.Path(self.graph_path))
+        self._graph = None
+        self._tick_created = False
+        self._graph_render_nodes.clear()
+        self._graph_camera_specs.clear()
+        self._gate_config.clear()
+        self._qos_config.clear()
+        self._runtime_camera_gates.clear()
 
     def configure_camera_gates(self, cameras: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         """Configure Isaac Sim 6.0 SyntheticData gates after helper startup.

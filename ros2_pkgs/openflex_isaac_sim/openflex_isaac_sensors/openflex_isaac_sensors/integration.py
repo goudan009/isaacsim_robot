@@ -100,6 +100,15 @@ def _profile_flags(sensor_profile: str) -> tuple[bool, bool]:
     return profile in {"rgb", "rgb_depth", "data"}, profile in {"lidar", "data"}
 
 
+def _set_omnigraph_gate(attribute_path: str, enabled: bool) -> None:
+    import omni.graph.core as og
+
+    attribute = og.Controller.attribute(attribute_path)
+    if attribute is None:
+        raise RuntimeError(f"sensor execution gate is missing: {attribute_path}")
+    attribute.set(1 if enabled else 0)
+
+
 def bootstrap_camera_gates(camera_records: list[dict]) -> None:
     """Play the timeline briefly to create SyntheticData gates, then configure them.
 
@@ -181,6 +190,7 @@ def create_robot_sensor_suite(
     lidar_config = load_mid360_config(mid360_root) if enable_lidar else {}
     created: list[str] = []
     camera_records: list[dict[str, object]] = []
+    runtime_controls: dict[str, object] = {}
     bridge: IsaacSimRos2Bridge | None = None
 
     if enable_cameras or enable_lidar:
@@ -250,6 +260,14 @@ def create_robot_sensor_suite(
         if camera_records:
             bridge.attach_cameras(camera_records)
             _LIVE_SENSOR_OBJECTS.append(bridge)
+            for record in camera_records:
+                namespace = str(record.get("rgb_topic", "")).strip("/").split("/", 1)[0]
+                suffix = namespace.removeprefix("cam_")
+                sensor_id = f"camera_{suffix}"
+                camera_key = str(record["camera_key"])
+                runtime_controls[sensor_id] = (
+                    lambda enabled, key=camera_key: bridge.set_camera_enabled(key, enabled)
+                )
 
     lidar_path = ""
     if enable_lidar:
@@ -309,6 +327,14 @@ def create_robot_sensor_suite(
             str(lidar.get("frame_id", "livox_frame")),
             str(lidar.get("imu_topic", "/livox/imu")),
         )
+        lidar_graph_path = robot_lidar_graph_path(robot_prim_path)
+        runtime_controls["lidar"] = lambda enabled: _set_omnigraph_gate(
+            f"{lidar_graph_path}/LidarEnableGate.inputs:step", enabled
+        )
+        imu_graph_path = f"{sensor_root_path}/IMU_ROS2_Graph"
+        runtime_controls["imu"] = lambda enabled: _set_omnigraph_gate(
+            f"{imu_graph_path}/IMUEnableGate.inputs:step", enabled
+        )
         created.extend([sensor_root_path, lidar_path, sensor_root_path + "/IMU"])
 
     if bridge is not None and camera_records:
@@ -346,6 +372,7 @@ def create_robot_sensor_suite(
         "success": True,
         "created": created,
         "camera_records": camera_records,
+        "runtime_controls": runtime_controls,
         "camera_count": len(camera_records),
         "lidar_prim_path": lidar_path,
         "sensor_profile": sensor_profile,

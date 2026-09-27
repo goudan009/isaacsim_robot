@@ -136,9 +136,11 @@ class RealSenseRig:
         self._stage: object | None = None
         self._sensor: object | None = None
         self._imu_sensor: object | None = None
+        self._camera_object: object | None = None
         self._camera_path: str | None = None
         self._camera_prim_path: str | None = None
         self._mount_path: str | None = None
+        self._mount_created = False
         self._local_pose = LocalPose()
         self._render_product_path: str | None = None
         self._period_s = 1.0 / self.config.tick_rate_hz
@@ -177,6 +179,7 @@ class RealSenseRig:
                 f"{parent_prim_path}"
             )
         existing_mount = stage.GetPrimAtPath(mount_path)
+        self._mount_created = not bool(existing_mount and existing_mount.IsValid())
         if existing_mount and existing_mount.IsValid():
             actual_parent = str(existing_mount.GetParent().GetPath())
             if actual_parent != parent_prim_path.rstrip("/"):
@@ -198,6 +201,7 @@ class RealSenseRig:
             translations=np.array([0.0, 0.0, 0.0]),
             orientations=np.array([1.0, 0.0, 0.0, 0.0]),
         )
+        self._camera_object = camera
         camera.camera.set_focal_lengths(self.config.focal_length_mm)
         camera.camera.set_clipping_ranges(self.config.near_m, self.config.far_m)
 
@@ -380,3 +384,45 @@ class RealSenseRig:
         self._active = False
         self._sensor = None
         self._imu_sensor = None
+
+    def destroy(self) -> None:
+        """Release runtime handles and remove only prims owned by this rig."""
+        errors: list[BaseException] = []
+        # CameraSensor owns its RenderProduct handle; explicitly destroying
+        # both can double-release Kit resources. Destroy the sensor wrapper,
+        # then remove any remaining USD product prim below.
+        for resource in (self._sensor, self._imu_sensor, self._camera_object):
+            destroy = getattr(resource, "destroy", None)
+            if callable(destroy):
+                try:
+                    destroy()
+                except BaseException as exc:
+                    errors.append(exc)
+
+        stage = self._stage
+        if stage is not None:
+            from pxr import Sdf
+
+            paths = [self._render_product_path, self._camera_prim_path]
+            if self._mount_created:
+                paths.append(self._mount_path)
+            for path in paths:
+                if not path:
+                    continue
+                try:
+                    prim = stage.GetPrimAtPath(path)
+                    if prim and prim.IsValid():
+                        stage.RemovePrim(Sdf.Path(path))
+                except BaseException as exc:
+                    errors.append(exc)
+
+        self.close()
+        self._camera_object = None
+        self._stage = None
+        self._camera_path = None
+        self._camera_prim_path = None
+        self._render_product_path = None
+        self._mount_path = None
+        self._mount_created = False
+        if errors:
+            raise RuntimeError("failed to release RealSense resources: " + "; ".join(map(str, errors)))

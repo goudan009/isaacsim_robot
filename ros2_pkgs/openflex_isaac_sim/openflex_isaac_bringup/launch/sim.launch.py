@@ -103,7 +103,7 @@ def _resolve_path(value: str) -> Path:
     return path if path.is_absolute() else Path.cwd() / path
 
 
-def _assert_api_port_available(host: str, port: int) -> None:
+def _assert_api_port_available(host: str, port: int, service_name: str = "Isaac REST API") -> None:
     bind_host = host.strip() or "127.0.0.1"
     if bind_host == "localhost":
         bind_host = "127.0.0.1"
@@ -114,7 +114,7 @@ def _assert_api_port_available(host: str, port: int) -> None:
             probe.bind((bind_host, port))
         except OSError as error:
             raise RuntimeError(
-                f"Isaac REST API port {bind_host}:{port} is already in use. "
+                f"{service_name} port {bind_host}:{port} is already in use. "
                 "Stop the stale Isaac/launch process or choose another api_port before starting."
             ) from error
 
@@ -241,10 +241,15 @@ def _controller_chain(context, controller_file: Path):
 def launch_setup(context, *args, **kwargs):
     bringup_share = Path(get_package_share_directory("openflex_isaac_bringup"))
     requested_profile = LaunchConfiguration("sensor_profile").perform(context).strip().lower()
-    profile_map = {"none": "none", "minimal": "rgb_depth", "lidar": "lidar", "full": "data"}
-    if requested_profile not in profile_map:
-        raise RuntimeError("sensor_profile must be 'none', 'minimal', 'lidar', or 'full'")
-    sensor_profile = profile_map[requested_profile]
+    if requested_profile != "none":
+        raise RuntimeError(
+            "sensor_profile must be 'none'; create and destroy sensors from the GUI after the robot is running"
+        )
+    if LaunchConfiguration("lidar_mount_mode").perform(context).strip().lower() != "parented":
+        raise RuntimeError(
+            "runtime MID360 sensors must use lidar_mount_mode:=parented"
+        )
+    sensor_profile = "none"
     lidar_profile = "MID360_PERFORMANCE"
     output_urdf = _resolve_path(LaunchConfiguration("generated_urdf").perform(context))
     robot_description = _generate_sensor_free_urdf(context, output_urdf)
@@ -318,6 +323,12 @@ def launch_setup(context, *args, **kwargs):
     api_host = LaunchConfiguration("api_host").perform(context)
     api_port = LaunchConfiguration("api_port").perform(context)
     _assert_api_port_available(api_host, int(api_port))
+    sensor_control_port = int(
+        LaunchConfiguration("sensor_control_port").perform(context)
+    )
+    _assert_api_port_available(
+        "127.0.0.1", sensor_control_port, service_name="sensor control API"
+    )
     physics_hz = LaunchConfiguration("physics_hz").perform(context)
     render_hz = LaunchConfiguration("render_hz").perform(context)
     headless = LaunchConfiguration("headless").perform(context)
@@ -347,11 +358,11 @@ def launch_setup(context, *args, **kwargs):
             "OPENFLEX_MID360_LIDAR_TRANSPORT": LaunchConfiguration(
                 "lidar_transport"
             ).perform(context),
-            "OPENFLEX_MID360_MOUNT_MODE": LaunchConfiguration(
-                "lidar_mount_mode"
-            ).perform(context),
             "OPENFLEX_MID360_OBJECT_ID_MAP": LaunchConfiguration(
                 "lidar_object_id_map"
+            ).perform(context),
+            "OPENFLEX_SENSOR_CONTROL_PORT": LaunchConfiguration(
+                "sensor_control_port"
             ).perform(context),
         },
     )
@@ -371,10 +382,10 @@ def launch_setup(context, *args, **kwargs):
                 "pitch": float(LaunchConfiguration("pitch").perform(context)),
                 "yaw": float(LaunchConfiguration("yaw").perform(context)),
                 "fixed": _as_bool(LaunchConfiguration("fixed").perform(context)),
-                # The default remains strictly sensor-free. ``quad`` is an
-                # explicit performance probe using the repository's four
-                # released RealSense mounts; it is not the old all-body stack.
-                "enable_sensors": sensor_profile != "none",
+                # The core robot launch always stays sensor-free. Sensor
+                # resources are registered as factories and instantiated only
+                # through the runtime lifecycle API after the control graph is ready.
+                "enable_sensors": False,
                 "apply_appearance": False,
                 "api_host": api_host,
                 "api_port": int(api_port),
@@ -382,9 +393,7 @@ def launch_setup(context, *args, **kwargs):
                 "poll_period": 2.0,
                 "auto_play": True,
                 "play_timeout": 60.0,
-                # MID360's first RTX frame must complete before controller
-                # spawners are released; zero-cost for the sensor-free path.
-                "post_play_settle_sec": 8.0 if sensor_profile != "none" else 0.0,
+                "post_play_settle_sec": 0.0,
             }
         ],
     )
@@ -433,46 +442,6 @@ def launch_setup(context, *args, **kwargs):
         ),
         TimerAction(period=2.0, actions=[spawn_node]),
     ]
-    if sensor_profile in ("rgb_depth", "data"):
-        actions.insert(
-            1,
-            Node(
-                package="openflex_isaac_bringup",
-                executable="camera_contract_publisher.py",
-                name="openflex_camera_contract_publisher",
-                output="both",
-                parameters=[{"max_rate_hz": 15.0, "jpeg_quality": 80}],
-            ),
-        )
-    if sensor_profile in ("lidar", "data"):
-        actions.insert(
-            1,
-            Node(
-                package="openflex_isaac_bringup",
-                executable="isaacsim_compat_bridge.py",
-                name="openflex_lidar_contract_bridge",
-                output="both",
-                parameters=[
-                    {
-                        "sensor_only_mode": True,
-                        "livox_lidar_mode": "custom",
-                        "livox_lidar_topic": "/livox/lidar",
-                        "livox_max_points": ParameterValue(
-                            LaunchConfiguration("livox_max_points"), value_type=int
-                        ),
-                        "pointcloud_topics": ["/livox/lidar_points"],
-                        "scan_topics": ["/scan"],
-                        "sim_scan_topic": "",
-                        "publish_scan_from_pointcloud": True,
-                        "publish_livox_imu": False,
-                        "publish_battery_state": False,
-                        "publish_lift_status": False,
-                        "publish_mapping_stub_services": False,
-                        "relay_cmd_vel_safe": False,
-                    }
-                ],
-            ),
-        )
     return actions
 
 
@@ -499,9 +468,9 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "sensor_profile",
-                default_value="full",
-                choices=["none", "minimal", "lidar", "full"],
-                description="none: control only; minimal: RGB-D cameras; lidar: MID360 and IMU; full: RGB-D cameras, MID360 and IMU",
+                default_value="none",
+                choices=["none"],
+                description="The robot core starts without sensor prims; sensors are managed dynamically from the GUI.",
             ),
             DeclareLaunchArgument(
                 "lidar_transport",
@@ -511,18 +480,14 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "lidar_mount_mode",
                 default_value="parented",
-                description="MID360 pose mode: parented follows the robot hierarchy; fixed_kinematic/fixed are diagnostics; follow is experimental",
+                choices=["parented"],
+                description="Runtime MID360 is mounted below the robot hierarchy and follows its motion.",
             ),
             DeclareLaunchArgument(
                 "lidar_object_id_map",
                 default_value="false",
                 description="Publish the MID360 object-id map topic; the native transport has no "
                 "StableIdMap annotator, so object-id output must stay off there",
-            ),
-            DeclareLaunchArgument(
-                "livox_max_points",
-                default_value="15000",
-                description="Maximum points per Livox CustomMsg compatibility frame",
             ),
             DeclareLaunchArgument(
                 "sensor_asset_dir",
@@ -541,6 +506,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("controller_use_sim_time", default_value="false"),
             DeclareLaunchArgument("api_host", default_value="127.0.0.1"),
             DeclareLaunchArgument("api_port", default_value="8085"),
+            DeclareLaunchArgument("sensor_control_port", default_value="8086"),
             DeclareLaunchArgument("physics_hz", default_value="120.0"),
             # No sensor render product is required for the control-only path.
             # 30 Hz is sufficient for diagnostic capture and keeps the

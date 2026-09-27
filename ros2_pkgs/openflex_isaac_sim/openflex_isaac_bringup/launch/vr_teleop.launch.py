@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Run the Pico/Quest VR control path against the Isaac Sim controllers."""
 
+import os
+from pathlib import Path
 import subprocess
 import sys
 
@@ -14,6 +16,13 @@ from launch_ros.substitutions import FindPackagePrefix, FindPackageShare
 
 
 def _start_vr_stack(context, nodes):
+    if IfCondition(LaunchConfiguration("enable_arms")).evaluate(context):
+        urdf_path = LaunchConfiguration("isaac_urdf").perform(context)
+        if not os.path.isfile(urdf_path):
+            raise RuntimeError(
+                f"Isaac robot URDF not found at {urdf_path}; start the simulation first "
+                "or pass isaac_urdf:=/absolute/path/to/robot_control_only.urdf"
+            )
     if IfCondition(LaunchConfiguration("stop_existing_vr")).evaluate(context):
         cleanup_script = PathJoinSubstitution(
             [
@@ -27,20 +36,43 @@ def _start_vr_stack(context, nodes):
     return nodes
 
 
-def generate_launch_description() -> LaunchDescription:
-    isaac_urdf = PathJoinSubstitution(
-        [
-            FindPackageShare("openflex_isaac_bringup"),
-            "assets",
-            "generated",
-            "openflex_isaac_robot.urdf",
-        ]
+def _default_isaac_urdf() -> str:
+    generated_dir = os.environ.get("ISAACSIM_ROBOT_GENERATED_DIR", "").strip()
+    if generated_dir:
+        return str(Path(generated_dir).expanduser() / "robot_control_only.urdf")
+    repository_root = os.environ.get("ISAACSIM_ROBOT_ROOT", "").strip()
+    if repository_root:
+        return str(
+            Path(repository_root).expanduser()
+            / "reports"
+            / "runtime"
+            / "generated"
+            / "robot_control_only.urdf"
+        )
+    cache_root = os.environ.get("XDG_CACHE_HOME", "").strip()
+    if cache_root:
+        return str(Path(cache_root).expanduser() / "mrs_robot/isaacsim_generated/robot_control_only.urdf")
+    return str(
+        Path.home()
+        / ".cache"
+        / "mrs_robot"
+        / "isaacsim_generated"
+        / "robot_control_only.urdf"
     )
+
+
+def generate_launch_description() -> LaunchDescription:
+    isaac_urdf = LaunchConfiguration("isaac_urdf")
     arm_config = PathJoinSubstitution(
         [FindPackageShare("openarmx_teleop_vr"), "config", "teleop_params.yaml"]
     )
 
     arguments = [
+        DeclareLaunchArgument(
+            "isaac_urdf",
+            default_value=_default_isaac_urdf(),
+            description="Generated URDF used by the running Isaac robot and its VR IK node",
+        ),
         DeclareLaunchArgument("listen_address", default_value="0.0.0.0"),
         DeclareLaunchArgument("listen_port", default_value="5100"),
         DeclareLaunchArgument("stop_existing_vr", default_value="true"),
