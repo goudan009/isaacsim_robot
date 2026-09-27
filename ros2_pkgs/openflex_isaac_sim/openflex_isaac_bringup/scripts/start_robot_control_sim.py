@@ -111,6 +111,15 @@ def _patch_simulation_app_startup() -> None:
     def simulation_app_with_single_gpu(config=None, *args, **kwargs):
         if isinstance(config, dict):
             config = dict(config)
+            if config.get("headless", False):
+                # The legacy REST runner passes hide_ui=False even in
+                # headless mode. That forces Kit to initialize a window on
+                # servers without a usable display, which prevents RTX sensor
+                # render products from producing frames. Keep headless truly
+                # windowless while leaving render products enabled for cameras
+                # and lidar.
+                config["hide_ui"] = True
+                config["disable_viewport_updates"] = True
             extra_args = list(config.get("extra_args", []))
             required_args = (
                 "--/app/runLoops/main/rateLimitEnabled=false",
