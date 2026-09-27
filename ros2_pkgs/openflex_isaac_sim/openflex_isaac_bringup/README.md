@@ -72,6 +72,15 @@ For a server or CI machine without a display, use `headless:=true` and omit
 terminal that must communicate with the simulation. With
 `ROS_LOCALHOST_ONLY=1`, remote machines cannot discover this ROS graph.
 
+Headless mode still needs working RTX/Vulkan access for camera and LiDAR
+render products. On Linux, check the render-node permissions with
+`ls -l /dev/dri/renderD*` and `id`. If a render node is owned by the `render`
+group and the simulation account is not a member, ask the machine administrator
+to add that account to `render`, then start a fresh login session. `nvidia-smi`
+working by itself does not confirm that Kit can open the RTX render device.
+The GUI environment preflight checks read/write access to available render
+nodes before reporting the simulation target as ready.
+
 Launch parameters and defaults:
 
 - `headless`: defaults to `true`; use `false` for the Isaac Sim GUI.

@@ -113,11 +113,9 @@ def _patch_simulation_app_startup() -> None:
             config = dict(config)
             if config.get("headless", False):
                 # The legacy REST runner passes hide_ui=False even in
-                # headless mode. That forces Kit to initialize a window on
-                # servers without a usable display, which prevents RTX sensor
-                # render products from producing frames. Keep headless truly
-                # windowless while leaving render products enabled for cameras
-                # and lidar.
+                # headless mode. Keep the UI hidden and avoid updating Kit's
+                # unused default viewport; camera and lidar RenderProducts
+                # remain enabled and are updated by the simulation.
                 config["hide_ui"] = True
                 config["disable_viewport_updates"] = True
             extra_args = list(config.get("extra_args", []))
