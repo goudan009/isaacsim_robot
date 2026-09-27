@@ -3,6 +3,73 @@
 OpenFleX 的独立 Isaac Sim 6.0 + ROS 2 Humble 仿真仓库。机器人仿真资产、六个 ROS 2 包、
 接口合同、测试和运行报告都在本仓库维护，不再把仿真源码拼接到 `openflex_ws/src`。
 
+## 与 OpenFleX 控制中心协作部署
+
+`isaacsim_robot` 是独立维护、独立构建的仓库；GUI 只通过 ROS 2 launch 和 topic/消息合同调用它。
+推荐在集成目录中与 `openflex_ws` 并列放置，**不要放进 `openflex_ws/src`**：
+
+```text
+openflex_all/                 # 集成目录；当前阶段不把仿真仓库提交进主仓库
+├── openflex_ws/              # GUI、真机 ROS 包及仿真所需 underlay
+└── isaacsim_robot/            # 本独立仓库，仿真维护者单独提交和发布
+```
+
+当前阶段不使用主仓库分支或 submodule。部署成员应从团队确认的 Isaac 仿真仓库地址单独克隆；
+本项目当前 `origin` 仍是 `https://github.com/goudan009/isaacsim_robot.git`。团队仓库迁移完成后，
+维护者再按团队实际地址更新 clone/remote 指引，不要猜测或自行创建仓库地址。集成目录的主仓库
+不要执行 `git add .` 来收录这个嵌套仓库。若未来需要让主仓库锁定已验收的仿真版本，再由双方维护者
+评估 Git submodule；届时主仓库只记录仿真仓库 URL 和提交 SHA，不复制仿真源码或历史。
+
+```bash
+export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
+export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_PATH=/绝对路径/isaacsim-6.0
+export ISAACSIM_GIT_URL=https://github.com/goudan009/isaacsim_robot.git  # 团队迁移后改成正式地址
+
+git clone "$ISAACSIM_GIT_URL" "$ISAACSIM_ROBOT_ROOT"
+```
+
+上面的路径只是示例，按每台机器的实际目录修改。**GUI 所填的软件路径属于所选运行目标**：
+选择本机时填本机路径；选择 SSH 工作站时，仿真仓库、OpenFleX 工作区、ROS 和 Isaac Sim
+必须已部署在远端，并填写远端路径。本机克隆不会自动出现在 4090/6000 Ada 工作站上。
+
+GUI 启动合同目前要求：
+
+- `ISAACSIM_ROBOT_ROOT/ros2_pkgs/openflex_isaac_sim/openflex_isaac_bringup/launch/sim.launch.py` 存在。
+- 仿真工作区已构建，且 `ISAACSIM_ROBOT_ROOT/install/setup.bash` 存在。
+- source 仿真工作区后，`ros2 pkg prefix openflex_isaac_bringup` 指向该仓库的 `install/`。
+- `ISAACSIM_PATH/python.sh` 存在且可执行。
+- ROS 环境按 ROS 2 Humble → OpenFleX underlay → 本仓库 overlay 的顺序加载。
+
+### 空目录的版本控制
+
+`openflex_isaac_description/CMakeLists.txt` 会安装 `meshes/` 和 `launch/`。这两个目录目前允许为空，
+但 Git 不保存空目录；6000 Ada 上的旧克隆中它们存在，新克隆中却消失，导致干净构建失败。目录内的
+`.gitkeep` 是有意保留的占位文件，保证 clone 后构建行为一致。今后若加入网格或 launch 文件，直接将
+真实资源放入对应目录并保留目录，不要删除 CMake 安装规则；也不要依赖部署机上手工创建的未跟踪目录。
+
+修改 launch 文件名、launch 参数、包名、ROS Domain/RMW 设置或控制/传感器 topic 时，仿真维护者
+需要同步更新本仓库文档与合同测试，并通知 GUI 维护者检查
+`openflex_gui/isaacsim_workflow.py` 的预检和启动参数。**不要为了让 GUI 通过预检而改写或复制仿真源码**；
+先确认两边的接口约定确实发生了变化。
+
+### 团队维护与验收顺序
+
+1. 在目标机安装匹配版本的 Isaac Sim、ROS 2 Humble 和 OpenFleX underlay；安装目录不属于本仓库，
+   不要将大型 Isaac Sim 安装包提交到 Git。
+2. 从团队仓库克隆本仓库到 `openflex_all/isaacsim_robot`，按下方“获取依赖”和“构建”步骤单独构建，
+   再 source 本仓库的 `install/setup.bash`。
+3. 在 GUI 仿真页按目标机分别填写路径，先运行“检查仿真环境”。检查通过只证明 ROS/包/文件路径满足
+   启动合同，不代表 Isaac Sim 已经实际运行。
+4. 首次启动建议使用无界面和 `none` 传感器档位做轻量冒烟测试；确认控制器、`/joint_states`、`/odom`
+   后再启用 RGB-D/MID360。停止仿真后，按项目测试和运行验收命令检查消息频率与传感器内容。
+5. 仿真仓库的提交、review、tag/release 均在本仓库独立完成。发布前运行本 README 的验证命令；
+   涉及 ROS 接口时同时更新 `docs/ARCHITECTURE_CN.md`、相关 package README 和合同测试。
+
+构建生成的 `build/`、`install/`、`log/`、`.deps/`、第三方源码和原始运行日志属于机器本地内容，
+不得提交。团队共享的测试结论应整理为可审阅的报告，而不是把完整临时日志或 Isaac Sim 安装目录入库。
+
 ## 仓库结构
 
 ```text
@@ -36,7 +103,10 @@ ROS 2 包包括 `openflex_isaac_description`、`openflex_isaac_contract`、
 ## 获取依赖
 
 ```bash
-cd /home/1024201092WYH/Robot/isaacsim_robot
+export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
+export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+cd "$ISAACSIM_ROBOT_ROOT"
 mkdir -p .deps/src
 vcs import .deps/src < config/dependencies.repos
 ```
@@ -46,9 +116,12 @@ vcs import .deps/src < config/dependencies.repos
 ## 构建
 
 ```bash
-cd /home/1024201092WYH/Robot/isaacsim_robot
+export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
+export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+cd "$ISAACSIM_ROBOT_ROOT"
 source /opt/ros/humble/setup.bash
-source /home/1024201092WYH/Robot/openflex_ws/install/setup.bash
+source "$OPENFLEX_WS_ROOT/install/setup.bash"
 
 colcon build --symlink-install \
   --base-paths ros2_pkgs/openflex_isaac_sim \
@@ -68,9 +141,13 @@ source install/setup.bash
 ## 启动
 
 ```bash
-cd /home/1024201092WYH/Robot/isaacsim_robot
+export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
+export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_PATH=/绝对路径/isaacsim-6.0
+cd "$ISAACSIM_ROBOT_ROOT"
 source /opt/ros/humble/setup.bash
-source /home/1024201092WYH/Robot/openflex_ws/install/setup.bash
+source "$OPENFLEX_WS_ROOT/install/setup.bash"
 source install/setup.bash
 
 export ISAACSIM_ROBOT_ROOT="$PWD"
@@ -87,7 +164,7 @@ ros2 launch openflex_isaac_bringup sim.launch.py \
   lidar_object_id_map:=false \
   livox_max_points:=15000 \
   start_upper_body:=true \
-  isaac_path:=/home/1024201092WYH/isaacsim-6.0 \
+  isaac_path:="$ISAACSIM_PATH" \
   api_port:=8085 \
   ros_domain_id:=49
 ```

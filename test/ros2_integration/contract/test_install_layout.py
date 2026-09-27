@@ -11,6 +11,21 @@ PACKAGE_DIR = REPO_DIR / "ros2_pkgs" / "openflex_isaac_sim" / "openflex_isaac_co
 
 
 class InstallLayoutTest(unittest.TestCase):
+    def test_description_install_directories_exist_in_a_clean_checkout(self) -> None:
+        package_dir = (
+            REPO_DIR
+            / "ros2_pkgs"
+            / "openflex_isaac_sim"
+            / "openflex_isaac_description"
+        )
+
+        for directory in ("meshes", "launch"):
+            with self.subTest(directory=directory):
+                self.assertTrue(
+                    (package_dir / directory).is_dir(),
+                    f"CMake installs {directory}/ but it is missing from the source checkout",
+                )
+
     def _installed_package_prefix(self) -> Path:
         prefixes = [
             Path(prefix)
