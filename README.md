@@ -75,6 +75,7 @@ GUI 启动合同目前要求：
 ```text
 isaacsim_robot/
 ├── isaac_sim_core/                  # USD、场景、机器人和传感器 canonical 配置
+├── python/isaac_sim_arena/          # IsaacLab-Arena 侧的 embodiment、动作与 ROS 遥操作设备
 ├── ros2_pkgs/openflex_isaac_sim/    # 六个 ROS 2 包
 ├── config/dependencies.repos        # 固定版本的第三方源码依赖
 ├── docs/                            # 架构、运行和性能边界
@@ -82,6 +83,10 @@ isaacsim_robot/
 ├── test/                            # 静态、ROS 2 集成和性能测试
 └── tools/                           # 资产和模型工具
 ```
+
+`python/isaac_sim_arena/` 不是 ROS 2 包，也不随 `colcon build` 构建：它是接进
+IsaacLab-Arena 的 Python 包，通过 venv 里的一个 `.pth` 挂上 `sys.path`，见下文
+「Arena 仿真与遥操作」。
 
 ROS 2 包包括 `openflex_isaac_description`、`openflex_isaac_contract`、
 `openflex_isaac_controllers`、`openflex_isaac_sensors`、`openflex_isaac_bridge` 和
@@ -175,6 +180,101 @@ ros2 launch openflex_isaac_bringup sim.launch.py \
 ros2 launch openflex_isaac_bringup rviz_only.launch.py \
   use_sim_time:=true ros_domain_id:=49
 ```
+
+## Arena 仿真与遥操作
+
+上面那套 `sim.launch.py` 是本仓库自己的 Isaac Sim 独立栈。另有一条并行的路：把同一台机器人接进
+**IsaacLab-Arena**，用 Arena 的场景库、任务库和录制入口跑，由 ROS 2 遥操作驱动。
+
+### 两个仓库，缺一不可
+
+| 仓库 | 提供什么 |
+|---|---|
+| `isaacsim_robot`（本仓库） | `python/isaac_sim_arena/`：embodiment、22 维动作、ROS 遥操作设备；`isaac_sim_core/` 机器人资产 |
+| `IsaacLab-Arena` | 场景库、任务库、`record_demos.py` 录制入口。本仓库不复制它 |
+
+Arena 侧只需要新增环境文件（`isaaclab_arena_environments/openflex_*.py`），Arena 核心不需要
+任何改动——`isaaclab_arena_environments/__init__.py` 会用 `pkgutil` 扫自己的目录并 import
+每一个模块，所以「往这个目录里放一个文件」就是 Arena 的插件入口。
+
+### 接线：一个 `.pth`
+
+`isaac_sim_arena` 不在 Arena 仓库里，靠 Arena 所用 venv 的一个 `.pth` 挂上 `sys.path`：
+
+```bash
+echo "/path/to/isaacsim_robot/python" \
+  > /path/to/isaac-venv/lib/python3.12/site-packages/isaac_sim_arena.pth
+```
+
+少这一行，Arena 里 `openflex` 这个名字查不到，环境建不起来。
+
+### 启动
+
+```bash
+# 终端 1 —— 仿真，在 IsaacLab-Arena 检出目录里运行
+ROS_DOMAIN_ID=2 ./arena.sh submodules/IsaacLab/scripts/tools/record_demos.py \
+  --task openflex_locomanip_pick_and_place \
+  --external_callback isaaclab_arena.environments.isaaclab_interop.environment_registration_callback \
+  --teleop_device ros --device cpu \
+  --dataset_file /tmp/teleop.hdf5 --num_demos 0 --num_success_steps 100000
+```
+
+```bash
+# 终端 2 —— VR 遥操作栈，在 OpenFleX underlay 里运行
+source /opt/ros/humble/setup.bash
+source <openflex_ws>/install/setup.bash
+export ROS_DOMAIN_ID=2
+ros2 launch openarmx_integrated_bringup integrated_vr_teleop.launch.py
+```
+
+该 launch 拉起六个节点：`openflex_vr_bridge/pico_pose_bridge_node`（C++，读头显）、
+`swerve_bringup/{vr_teleop_node, vr_lift_control_node, waist_chassis_control_node}`、
+`openarmx_teleop_vr/openarmx_teleop_vr_node`（双臂）、
+`openarmx_head_teleop_vr_pico/head_teleop_node`（头）。默认速度对工业场景偏快，要覆盖
+`max_linear_speed` / `max_angular_speed` / `acceleration_time`。
+
+`arena.sh` 是启动器，不在本仓库里。它必须做三件事：清掉 `PYTHONPATH`（否则 `~/.bashrc` 里
+ROS Humble 的 Python 3.10 site-packages 会污染 venv 的 3.12，`pinocchio` 会 import 失败）、
+给 Nucleus 资产桶配上代理、接受 EULA。`arena_ros.sh` 是它的 ROS 版，额外保留
+`LD_LIBRARY_PATH` 以便 `rclpy` 能 import。
+
+**`ROS_DOMAIN_ID=2` 不是可选项。** domain 0 上可能长期跑着一整套 MuJoCo `ros2_control` 栈，
+而 `/cmd_vel`、`/left_forward_position_controller/commands` 这些话题名与 Arena 这条链**完全
+同名**，不隔离两个机器人会一起动。
+
+### 动作空间
+
+`action` 是 22 维。四个 ROS 话题拼接起来正好是 `action[3:22]`，不需要置换表：
+
+| action | 话题 | 语义 |
+|---|---|---|
+| `[0:3]` | `/cmd_vel` | 底盘 twist |
+| `[3:4]` | `/lift_manual_position_controller/jog_command` | 升降**速度**（m/s），在设备内积分 |
+| `[4:6]` | `/head_forward_position_controller/commands` | `[yaw, pitch]` |
+| `[6:13]` | `/left_forward_position_controller/commands` | 左臂 j1–j7 |
+| `[13:14]` | 同上第 8 个元素 | 左夹爪 |
+| `[14:21]` | `/right_forward_position_controller/commands` | 右臂 j1–j7 |
+| `[21:22]` | 同上第 8 个元素 | 右夹爪 |
+
+上半身各维是**绝对位置**，升降是唯一的例外：真机发的是增量速度、由桥接积分，Arena 侧那个桥
+不在，所以积分做在设备里。
+
+### 两个必须知道的坑
+
+- **`/joint_states` 由本仓库的设备自己发布**，用**默认 QoS（RELIABLE）**。
+  `openarmx_teleop_vr_node` 和 `head_teleop_node` 都拿它当硬前提，缺了是**静默失效**：不报错、
+  不打日志、话题上一条消息都没有（真机那条是 `Robot.usda` 里的 OmniGraph 在发，Arena 不加载
+  那个 USD）。发 BEST_EFFORT 会与默认 RELIABLE 订阅不匹配，同样静默。
+- **`record_demos.py` 硬编码 `EXPORT_SUCCEEDED_ONLY`**：任务不成功就写一个空文件，而且
+  `--num_demos` 永远到不了。所以长时间自由遥操作要用上面的 `--num_demos 0
+  --num_success_steps 100000`（0 = 无限）。环境 cfg 上的 `self_test_success` 字段能把成功项
+  换成恒真，但那是**测试开关，只为验证录制链路**，录出来的数据不能当训练集。
+
+### 当前边界
+
+夹爪未接（安装的臂节点发 7 元素载荷，设备按 `len(msg.data)` 分派，7 元素时不碰夹爪维度）；
+`openflex_hydrogen_station` 场景需要加氢柜资产，该资产见 `python/isaac_sim_arena/constants.py`
+里记录的来源与 md5（因超过 GitHub 单文件上限而未随仓库分发）。
 
 ## 默认接口
 

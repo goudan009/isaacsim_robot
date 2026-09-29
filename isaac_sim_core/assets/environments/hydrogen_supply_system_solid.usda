@@ -1,0 +1,58 @@
+#usda 1.0
+(
+    defaultPrim = "HydrogenSupplySystem"
+    metersPerUnit = 1.0
+    upAxis = "Z"
+    doc = """The hydrogen supply cabinet, made solid. Spawn this file, not
+hydrogen_supply_system.usd.
+
+The imported file carries no collision of any kind, measured rather than assumed:
+/World/node_/mesh_ has MaterialBindingAPI and nothing else -- no PhysicsCollisionAPI, no
+PhysicsMeshCollisionAPI, no RigidBodyAPI, and no prim anywhere in the file has them. Spawning
+it as it comes therefore gives a cabinet the robot drives straight through.
+
+Wrapping rather than editing is what keeps the import honest. The reference below brings the
+original in unchanged, so every number that describes it still describes the file copied out
+of openflex_ws -- 11,503,617 points, 3,834,539 faces, and the metresPerUnit = 0.01 that the
+spawn's 0.001 scale exists to compensate for (see
+isaac_sim_arena.constants.HYDROGEN_SUPPLY_SYSTEM_SCALE). Editing the original would have
+meant rewriting 276 MB to add two lines, and would have invalidated the md5 the copy is
+recorded under.
+
+The collider is authored on the mesh itself and left to PhysX to size, rather than typed in
+as a box. physics:approximation = "boundingCube" makes the collider the mesh's own
+axis-aligned bounds, which for a rectangular cabinet is the cabinet, so there are no second
+set of dimensions to drift out of step with the visual. It is also the only affordable
+approximation here: 3.8 M faces rules out a triangle mesh or a convex decomposition, and
+"boundingCube" costs a bounds computation the renderer has already done.
+
+The result is a *static* collider -- a collider with no rigid body, which is the same thing
+the ground plane is. PhysX uses those to block dynamic bodies, so the robot and its arms stop
+at the cabinet's surface while the cabinet itself never moves or falls.
+"""
+)
+
+def Xform "HydrogenSupplySystem" (
+    kind = "component"
+)
+{
+    def Xform "cabinet" (
+        references = @./hydrogen_supply_system.usd@</World>
+    )
+    {
+        # The reference is to /World, so its own two children arrive here: node_ holding the
+        # single merged mesh, and Looks holding the material bound to it. The override below
+        # reaches the mesh through the reference; nothing in this file is instanceable, so
+        # the override is legal -- checked on the source stage, where shelf, table, rack and
+        # every ancestor of the mesh report instanceable = False.
+        over "node_"
+        {
+            over "mesh_" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "boundingCube"
+            }
+        }
+    }
+}

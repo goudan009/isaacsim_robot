@@ -19,6 +19,15 @@ isaac_sim_core/assets/generated/
 *.usd.bak
 *.usda.bak
 
+# The hydrogen cabinet import: 263 MB, over GitHub's 100 MB per-file limit, and part of the
+# hydrogen station scene only -- the teleoperation workflow never loads it. Ignored so it
+# cannot be committed by accident; a clone without it runs everything except
+# `openflex_hydrogen_station`. Regenerate it from the source file recorded in
+# python/isaac_sim_arena/constants.py (md5 b7827628bb433d2101798735f5f43163).
+# Its 2.7 KB `_solid.usda` wrapper stays tracked: that wrapper is this repository's own work
+# (the collider the import is missing), so it is kept even while the file it references is not.
+isaac_sim_core/assets/environments/hydrogen_supply_system.usd
+
 # Local reports and runtime logs
 reports/raw/
 reports/**/raw/
