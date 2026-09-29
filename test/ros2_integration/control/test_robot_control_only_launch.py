@@ -13,6 +13,10 @@ START_SCRIPT = BRINGUP / "scripts" / "start_robot_control_sim.py"
 
 
 class RobotControlLaunchTest(unittest.TestCase):
+    def test_sim_launch_python_syntax_is_valid(self) -> None:
+        source = SIM_LAUNCH.read_text(encoding="utf-8")
+        compile(source, str(SIM_LAUNCH), "exec")
+
     def test_core_launch_is_sensor_free_and_has_runtime_sensor_lifecycle(self) -> None:
         text = SIM_LAUNCH.read_text(encoding="utf-8")
         start_text = START_SCRIPT.read_text(encoding="utf-8")

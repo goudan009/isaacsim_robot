@@ -40,7 +40,7 @@ observation 向量定义。
 因此应编译并 source contract、description 和 bringup 三个包后运行：
 
 ```bash
-cd /path/to/isaacsim_robot
+cd /path/to/MRS_ROBOT_sim
 source /opt/ros/humble/setup.bash
 source /path/to/openflex_ws/install/setup.bash
 colcon build --symlink-install \

@@ -2,11 +2,11 @@
 
 ## 当前边界
 
-`isaacsim_robot` 是 Isaac Sim + ROS 2 仿真的唯一 Git 边界。OpenFleX 主工作空间是运行和
+`MRS_ROBOT_sim` 是 Isaac Sim + ROS 2 仿真的唯一 Git 边界。OpenFleX 主工作空间是运行和
 构建 underlay，不拥有本仓库的仿真源码。
 
 ```text
-isaacsim_robot/
+MRS_ROBOT_sim/
 ├── isaac_sim_core/                  # USD、场景、机器人和传感器配置
 ├── ros2_pkgs/openflex_isaac_sim/    # 六个 ROS 2 包
 ├── config/                          # 可复现第三方依赖

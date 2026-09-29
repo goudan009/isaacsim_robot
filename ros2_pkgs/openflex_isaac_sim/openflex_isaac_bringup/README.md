@@ -21,7 +21,7 @@ the complete Isaac Sim 6.0 workflow uses `sim.launch.py` below.
 ## Build
 
 ```bash
-cd /home/1024201092WYH/openflex_all/isaacsim_robot
+cd /home/1024201092WYH/openflex_all/MRS_ROBOT_sim
 source /opt/ros/humble/setup.bash
 source /home/1024201092WYH/openflex_all/openflex_ws/install/setup.bash
 colcon build --symlink-install \
@@ -44,7 +44,7 @@ With no launch arguments, `sim.launch.py` defaults to `headless:=true`,
 It does not start RViz.
 
 ```bash
-cd /home/1024201092WYH/openflex_all/isaacsim_robot
+cd /home/1024201092WYH/openflex_all/MRS_ROBOT_sim
 source /opt/ros/humble/setup.bash
 source /home/1024201092WYH/openflex_all/openflex_ws/install/setup.bash
 source install/setup.bash
@@ -151,7 +151,7 @@ the simulation is running, use a second terminal:
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/1024201092WYH/openflex_all/isaacsim_robot/install/setup.bash
+source /home/1024201092WYH/openflex_all/MRS_ROBOT_sim/install/setup.bash
 ros2 launch openflex_isaac_bringup rviz_only.launch.py use_sim_time:=true
 ```
 

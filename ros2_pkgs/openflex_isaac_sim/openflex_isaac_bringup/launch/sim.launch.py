@@ -40,11 +40,11 @@ def _default_sensor_asset_dir() -> Path:
         if (candidate / "isaac_sim_core").is_dir():
             return candidate
     for parent in Path(__file__).resolve().parents:
-        for candidate in (parent, parent / "isaacsim_robot"):
+        for candidate in (parent, parent / "MRS_ROBOT_sim", parent / "isaacsim_robot"):
             if (candidate / "isaac_sim_core").is_dir():
                 return candidate
     raise RuntimeError(
-        "Isaac Sim asset root was not found. Launch from the isaacsim_robot "
+        "Isaac Sim asset root was not found. Launch from the MRS_ROBOT_sim "
         "repository root or set ISAACSIM_ROBOT_ROOT."
     )
 

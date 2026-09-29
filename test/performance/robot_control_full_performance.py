@@ -389,7 +389,7 @@ def _existing_isaac_processes() -> list[str]:
     current_pid = str(os.getpid())
     matches = []
     for line in result.stdout.splitlines():
-        # Do not match the workspace name (``isaacsim_robot``) or the Codex
+        # Do not match the workspace name (``MRS_ROBOT_sim``) or the Codex
         # launcher that happens to contain that path. Match an actual Kit/
         # Isaac executable or the dedicated child launcher instead.
         lowered = line.lower()

@@ -1,31 +1,32 @@
-# OpenFleX Isaac Sim Robot
+# MRS_ROBOT_sim
 
 OpenFleX 的独立 Isaac Sim 6.0 + ROS 2 Humble 仿真仓库。机器人仿真资产、六个 ROS 2 包、
 接口合同、测试和运行报告都在本仓库维护，不再把仿真源码拼接到 `openflex_ws/src`。
 
 ## 与 OpenFleX 控制中心协作部署
 
-`isaacsim_robot` 是独立维护、独立构建的仓库；GUI 只通过 ROS 2 launch 和 topic/消息合同调用它。
+`MRS_ROBOT_sim` 是独立维护、独立构建的 Isaac Sim + ROS 2 仿真仓库；GUI 只通过 ROS 2 launch 和 topic/消息合同调用它。
 推荐在集成目录中与 `openflex_ws` 并列放置，**不要放进 `openflex_ws/src`**：
 
 ```text
 openflex_all/                 # 集成目录；当前阶段不把仿真仓库提交进主仓库
 ├── openflex_ws/              # GUI、真机 ROS 包及仿真所需 underlay
-└── isaacsim_robot/            # 本独立仓库，仿真维护者单独提交和发布
+├── MRS_ROBOT_sim/              # Isaac Sim + ROS 仿真运行时，独立提交和发布
+└── MRS_ROBOT_arena/            # Arena 原生任务和策略评测，独立提交和发布
 ```
 
 当前阶段不使用主仓库分支或 submodule。部署成员应从团队确认的 Isaac 仿真仓库地址单独克隆；
-本项目当前 `origin` 仍是 `https://github.com/goudan009/isaacsim_robot.git`。团队仓库迁移完成后，
-维护者再按团队实际地址更新 clone/remote 指引，不要猜测或自行创建仓库地址。集成目录的主仓库
+团队仓库地址为 `git@github.com:mrs-lab-robot/MRS_ROBOT_sim.git`。本地 `origin` 应指向该团队仓库；
+原 `goudan009/isaacsim_robot` 地址仅作为迁移来源保留，不再用于新的部署。集成目录的主仓库
 不要执行 `git add .` 来收录这个嵌套仓库。若未来需要让主仓库锁定已验收的仿真版本，再由双方维护者
 评估 Git submodule；届时主仓库只记录仿真仓库 URL 和提交 SHA，不复制仿真源码或历史。
 
 ```bash
 export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
 export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
-export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/MRS_ROBOT_sim"  # 兼容保留的变量名
 export ISAACSIM_PATH=/绝对路径/isaacsim-6.0
-export ISAACSIM_GIT_URL=https://github.com/goudan009/isaacsim_robot.git  # 团队迁移后改成正式地址
+export ISAACSIM_GIT_URL=git@github.com:mrs-lab-robot/MRS_ROBOT_sim.git
 
 git clone "$ISAACSIM_GIT_URL" "$ISAACSIM_ROBOT_ROOT"
 ```
@@ -58,7 +59,7 @@ GUI 启动合同目前要求：
 
 1. 在目标机安装匹配版本的 Isaac Sim、ROS 2 Humble 和 OpenFleX underlay；安装目录不属于本仓库，
    不要将大型 Isaac Sim 安装包提交到 Git。
-2. 从团队仓库克隆本仓库到 `openflex_all/isaacsim_robot`，按下方“获取依赖”和“构建”步骤单独构建，
+2. 从团队仓库克隆本仓库到 `openflex_all/MRS_ROBOT_sim`，按下方“获取依赖”和“构建”步骤单独构建，
    再 source 本仓库的 `install/setup.bash`。
 3. 在 GUI 仿真页按目标机分别填写路径，先运行“检查仿真环境”。检查通过只证明 ROS/包/文件路径满足
    启动合同，不代表 Isaac Sim 已经实际运行。
@@ -73,7 +74,7 @@ GUI 启动合同目前要求：
 ## 仓库结构
 
 ```text
-isaacsim_robot/
+MRS_ROBOT_sim/
 ├── isaac_sim_core/                  # USD、场景、机器人和传感器 canonical 配置
 ├── ros2_pkgs/openflex_isaac_sim/    # 六个 ROS 2 包
 ├── config/dependencies.repos        # 固定版本的第三方源码依赖
@@ -105,7 +106,7 @@ ROS 2 包包括 `openflex_isaac_description`、`openflex_isaac_contract`、
 ```bash
 export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
 export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
-export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/MRS_ROBOT_sim"
 cd "$ISAACSIM_ROBOT_ROOT"
 mkdir -p .deps/src
 vcs import .deps/src < config/dependencies.repos
@@ -118,7 +119,7 @@ vcs import .deps/src < config/dependencies.repos
 ```bash
 export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
 export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
-export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/MRS_ROBOT_sim"
 cd "$ISAACSIM_ROBOT_ROOT"
 source /opt/ros/humble/setup.bash
 source "$OPENFLEX_WS_ROOT/install/setup.bash"
@@ -143,7 +144,7 @@ source install/setup.bash
 ```bash
 export OPENFLEX_ALL_ROOT=/绝对路径/openflex_all
 export OPENFLEX_WS_ROOT="$OPENFLEX_ALL_ROOT/openflex_ws"
-export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/isaacsim_robot"
+export ISAACSIM_ROBOT_ROOT="$OPENFLEX_ALL_ROOT/MRS_ROBOT_sim"
 export ISAACSIM_PATH=/绝对路径/isaacsim-6.0
 cd "$ISAACSIM_ROBOT_ROOT"
 source /opt/ros/humble/setup.bash
